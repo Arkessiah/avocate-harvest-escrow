@@ -6,7 +6,7 @@ Soroban workspace (`soroban-sdk` 29, target `wasm32v1-none`).
 
 | Contract | Purpose |
 |---|---|
-| `contracts/platform` | Avocate's single entry point. Holds the fee schedule and the service accounts (agent, validator), all admin-only; deploys one escrow per trade with the terms in force at that moment, and keeps the registry of every trade it created. Escrows deployed outside it are not Avocate operations. Upgradeable in place. |
+| `contracts/platform` | Avocate's single entry point. Holds the fee schedule, the service accounts (agent, validator) and the linked financing pool, all admin-only; deploys one escrow per trade with the terms in force at that moment, and keeps the registry of every trade it created. Escrows deployed outside it are not Avocate operations. Upgradeable in place. |
 | `contracts/escrow` | One instance per trade. The buyer locks the price plus the trade fee in USDC. An independent validator attests the delivery once (conforming or not, with the report hash). The seller is paid the full price when the buyer confirms, or when the agent settles after a conforming validation; the agent can trigger nothing else. A rejected delivery or an expired deadline gives the buyer the whole deposit back. |
 | `contracts/pool` | Financing pool following the SEP-56 vault interface. Anyone can deposit USDC for shares and redeem them; in later steps it advances money to farmers against funded escrows. Shares are internal balances, not a transferable token. |
 
@@ -23,7 +23,7 @@ Fee schedule (basis points, configurable by the platform admin):
 Every rule below is enforced on-chain and covered by tests.
 
 **Trade escrow**
-- Trade terms (parties, token, price, fee, agent, validator, deadline) are fixed at creation; nobody can redirect the payout or change the amount.
+- Trade terms (parties, token, price, fees, agent, validator, pool, deadline) are fixed at creation; nobody can redirect the payout or change the amount.
 - Only the buyer can fund, confirm or claim a refund.
 - The validator attests a delivery **once**. A verdict that could be rewritten would let a negative attestation be swapped in later to unlock a refund.
 - The agent can only trigger the payout already agreed, and only after a conforming validation. It cannot choose recipients or amounts.
@@ -32,7 +32,8 @@ Every rule below is enforced on-chain and covered by tests.
 
 **Platform**
 - Fee schedule, service accounts and escrow code are admin-only. Changes apply to new trades only; open trades keep the terms they were created with.
-- Only escrows deployed by the platform are listed in its registry, so an escrow created on custom terms cannot pass for an Avocate operation.
+- Only escrows deployed by the platform are listed in its registry, so an escrow created on custom terms cannot pass for an Avocate operation. `is_escrow` exposes that check in a single read for other contracts (the pool uses it before lending).
+- No trade can be opened until the admin links the financing pool, so every escrow knows from birth which pool may finance it.
 
 **Financing pool**
 - Idle cash is tracked internally, so sending USDC straight to the pool cannot move the share price.

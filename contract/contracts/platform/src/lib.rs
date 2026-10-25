@@ -15,6 +15,8 @@ const MAX_PAGE: u32 = 50;
 #[repr(u32)]
 pub enum Error {
     InvalidFee = 1,
+    /// The financing pool has to be linked with `set_pool` before trades can be opened.
+    PoolNotSet = 2,
 }
 
 /// Fee schedule in basis points. Each new escrow snapshots it, so changing it only
@@ -37,10 +39,37 @@ enum DataKey {
     Treasury,
     Agent,
     Validator,
+    Pool,
     EscrowWasm,
     Fees,
     EscrowCount,
     Escrow(u32),
+    /// Reverse index, so the pool can check in one read that an escrow is an Avocate trade.
+    EscrowIndex(Address),
+}
+
+// Mirrors of the escrow constructor types. Contract types travel as maps keyed by field
+// name, so identical field names are all the escrow needs to decode them.
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Parties {
+    pub buyer: Address,
+    pub seller: Address,
+    pub platform: Address,
+    pub agent: Address,
+    pub validator: Address,
+    pub pool: Address,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Terms {
+    pub token: Address,
+    pub amount: i128,
+    pub trade_fee_bps: u32,
+    pub financing_fee_bps: u32,
+    pub pool_yield_bps: u32,
+    pub deadline: u64,
 }
 
 #[contractevent]
@@ -113,6 +142,14 @@ impl Platform {
         bump(&env);
     }
 
+    /// Links the financing pool. Done after deployment because the pool itself needs the
+    /// platform address to recognise Avocate trades.
+    pub fn set_pool(env: Env, pool: Address) {
+        admin(&env).require_auth();
+        env.storage().instance().set(&DataKey::Pool, &pool);
+        bump(&env);
+    }
+
     /// Escrow code used for trades created from now on; existing escrows keep theirs.
     pub fn set_escrow_wasm(env: Env, escrow_wasm: BytesN<32>) {
         admin(&env).require_auth();
@@ -145,19 +182,28 @@ impl Platform {
         let treasury: Address = store.get(&DataKey::Treasury).unwrap();
         let agent: Address = store.get(&DataKey::Agent).unwrap();
         let validator: Address = store.get(&DataKey::Validator).unwrap();
+        let pool: Address = match store.get(&DataKey::Pool) {
+            Some(p) => p,
+            None => panic_with_error!(&env, Error::PoolNotSet),
+        };
 
-        let args: Vec<Val> = (
-            buyer.clone(),
-            seller.clone(),
-            treasury,
+        let parties = Parties {
+            buyer: buyer.clone(),
+            seller: seller.clone(),
+            platform: treasury,
             agent,
             validator,
+            pool,
+        };
+        let terms = Terms {
             token,
             amount,
-            fees.trade_fee_bps,
+            trade_fee_bps: fees.trade_fee_bps,
+            financing_fee_bps: fees.financing_fee_bps,
+            pool_yield_bps: fees.pool_yield_bps,
             deadline,
-        )
-            .into_val(&env);
+        };
+        let args: Vec<Val> = (parties, terms).into_val(&env);
         // The registry index is the salt: unique per platform, so addresses never collide
         // and anyone can recompute where escrow N lives.
         let escrow = env
@@ -168,6 +214,9 @@ impl Platform {
         let key = DataKey::Escrow(index);
         env.storage().persistent().set(&key, &escrow);
         env.storage().persistent().extend_ttl(&key, BUMP_THRESHOLD, BUMP_TO);
+        let reverse = DataKey::EscrowIndex(escrow.clone());
+        env.storage().persistent().set(&reverse, &index);
+        env.storage().persistent().extend_ttl(&reverse, BUMP_THRESHOLD, BUMP_TO);
         store.set(&DataKey::EscrowCount, &(index + 1));
         EscrowCreated { buyer, seller, index, escrow: escrow.clone(), amount }.publish(&env);
         bump(&env);
@@ -193,6 +242,15 @@ impl Platform {
 
     pub fn admin(env: Env) -> Address {
         admin(&env)
+    }
+
+    pub fn pool(env: Env) -> Option<Address> {
+        env.storage().instance().get(&DataKey::Pool)
+    }
+
+    /// Whether `escrow` was deployed by this platform, i.e. is a genuine Avocate trade.
+    pub fn is_escrow(env: Env, escrow: Address) -> bool {
+        env.storage().persistent().has(&DataKey::EscrowIndex(escrow))
     }
 
     pub fn escrow_count(env: Env) -> u32 {

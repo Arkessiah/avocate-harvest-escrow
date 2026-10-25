@@ -31,6 +31,32 @@ pub enum State {
     Refunded,
 }
 
+/// Who takes part in the trade.
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Parties {
+    pub buyer: Address,
+    pub seller: Address,
+    /// Treasury receiving the platform fees.
+    pub platform: Address,
+    pub agent: Address,
+    pub validator: Address,
+    /// Financing pool allowed to advance money to the seller on this trade.
+    pub pool: Address,
+}
+
+/// Economic terms, snapshotted from the platform's schedule when the trade is created.
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Terms {
+    pub token: Address,
+    pub amount: i128,
+    pub trade_fee_bps: u32,
+    pub financing_fee_bps: u32,
+    pub pool_yield_bps: u32,
+    pub deadline: u64,
+}
+
 /// Trade terms, fixed at deploy time. Nobody can change who gets paid or how much.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -42,12 +68,17 @@ pub struct Config {
     pub agent: Address,
     /// Independent inspector that attests whether the delivery conforms.
     pub validator: Address,
+    pub pool: Address,
     pub token: Address,
     /// Price of the goods; the seller receives it in full.
     pub amount: i128,
     /// Service fee charged to the buyer on top of the price, snapshotted at creation so
     /// later changes to the platform's fee schedule never alter an agreed trade.
     pub trade_fee_bps: u32,
+    /// Charged to the seller on an advance from the pool, paid to the treasury.
+    pub financing_fee_bps: u32,
+    /// Return owed to the pool on an advance.
+    pub pool_yield_bps: u32,
     /// Unix timestamp after which the buyer may take the funds back.
     pub deadline: u64,
 }
@@ -107,29 +138,31 @@ pub struct Escrow;
 
 #[contractimpl]
 impl Escrow {
-    pub fn __constructor(
-        env: Env,
-        buyer: Address,
-        seller: Address,
-        platform: Address,
-        agent: Address,
-        validator: Address,
-        token: Address,
-        amount: i128,
-        trade_fee_bps: u32,
-        deadline: u64,
-    ) {
-        if amount <= 0 {
+    pub fn __constructor(env: Env, parties: Parties, terms: Terms) {
+        if terms.amount <= 0 {
             panic_with_error!(&env, Error::InvalidAmount);
         }
-        if i128::from(trade_fee_bps) > BPS_DENOMINATOR {
+        let fees = [terms.trade_fee_bps, terms.financing_fee_bps, terms.pool_yield_bps];
+        if fees.iter().any(|f| i128::from(*f) > BPS_DENOMINATOR) {
             panic_with_error!(&env, Error::InvalidFee);
         }
-        if deadline <= env.ledger().timestamp() {
+        if terms.deadline <= env.ledger().timestamp() {
             panic_with_error!(&env, Error::InvalidDeadline);
         }
-        let config =
-            Config { buyer, seller, platform, agent, validator, token, amount, trade_fee_bps, deadline };
+        let config = Config {
+            buyer: parties.buyer,
+            seller: parties.seller,
+            platform: parties.platform,
+            agent: parties.agent,
+            validator: parties.validator,
+            pool: parties.pool,
+            token: terms.token,
+            amount: terms.amount,
+            trade_fee_bps: terms.trade_fee_bps,
+            financing_fee_bps: terms.financing_fee_bps,
+            pool_yield_bps: terms.pool_yield_bps,
+            deadline: terms.deadline,
+        };
         env.storage().instance().set(&DataKey::Config, &config);
         env.storage().instance().set(&DataKey::State, &State::Pending);
         bump(&env);

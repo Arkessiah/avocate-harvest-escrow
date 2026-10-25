@@ -11,6 +11,28 @@ const FEE_BPS: u32 = 10; // 0.1%
 const FEE: i128 = USDC; // 0.1% of 1000 USDC
 const DEADLINE: u64 = 1_000_000;
 
+fn terms(token: &Address, amount: i128, trade_fee_bps: u32, deadline: u64) -> Terms {
+    Terms {
+        token: token.clone(),
+        amount,
+        trade_fee_bps,
+        financing_fee_bps: 20,
+        pool_yield_bps: 200,
+        deadline,
+    }
+}
+
+fn same_parties(a: &Address) -> Parties {
+    Parties {
+        buyer: a.clone(),
+        seller: a.clone(),
+        platform: a.clone(),
+        agent: a.clone(),
+        validator: a.clone(),
+        pool: a.clone(),
+    }
+}
+
 // Owned values only: keeping a client with a borrowed Env inside the struct is a
 // self-referential lifetime the borrow checker rejects, so clients are built on demand.
 struct Setup {
@@ -20,6 +42,7 @@ struct Setup {
     platform: Address,
     agent: Address,
     validator: Address,
+    pool: Address,
     token: Address,
     escrow: Address,
 }
@@ -36,14 +59,20 @@ impl Setup {
         let platform = Address::generate(&env);
         let agent = Address::generate(&env);
         let validator = Address::generate(&env);
+        let pool = Address::generate(&env);
         let token = env.register_stellar_asset_contract_v2(issuer).address();
         StellarAssetClient::new(&env, &token).mint(&buyer, &(5_000 * USDC));
 
-        let escrow = env.register(
-            Escrow,
-            (&buyer, &seller, &platform, &agent, &validator, &token, AMOUNT, fee_bps, DEADLINE),
-        );
-        Setup { env, buyer, seller, platform, agent, validator, token, escrow }
+        let parties = Parties {
+            buyer: buyer.clone(),
+            seller: seller.clone(),
+            platform: platform.clone(),
+            agent: agent.clone(),
+            validator: validator.clone(),
+            pool: pool.clone(),
+        };
+        let escrow = env.register(Escrow, (parties, terms(&token, AMOUNT, fee_bps, DEADLINE)));
+        Setup { env, buyer, seller, platform, agent, validator, pool, token, escrow }
     }
 
     fn client(&self) -> EscrowClient<'_> {
@@ -67,6 +96,9 @@ fn starts_pending_with_the_agreed_terms() {
     assert_eq!(config.buyer, s.buyer);
     assert_eq!(config.amount, AMOUNT);
     assert_eq!(config.trade_fee_bps, FEE_BPS);
+    assert_eq!(config.financing_fee_bps, 20);
+    assert_eq!(config.pool_yield_bps, 200);
+    assert_eq!(config.pool, s.pool);
 }
 
 #[test]
@@ -165,7 +197,8 @@ fn fee_rounds_down_on_tiny_amounts() {
     let token = env.register_stellar_asset_contract_v2(issuer).address();
     StellarAssetClient::new(&env, &token).mint(&buyer, &10_000);
     // 999 base units at 0.1% is 0.999 -> 0: the platform waives the fraction.
-    let escrow = env.register(Escrow, (&buyer, &a, &a, &a, &a, &token, 999_i128, FEE_BPS, DEADLINE));
+    let parties = Parties { buyer: buyer.clone(), ..same_parties(&a) };
+    let escrow = env.register(Escrow, (parties, terms(&token, 999, FEE_BPS, DEADLINE)));
     EscrowClient::new(&env, &escrow).fund();
     assert_eq!(TokenClient::new(&env, &token).balance(&buyer), 10_000 - 999);
 }
@@ -182,7 +215,7 @@ fn rejects_a_deadline_in_the_past() {
     let env = Env::default();
     env.ledger().set_timestamp(DEADLINE + 1);
     let a = Address::generate(&env);
-    env.register(Escrow, (&a, &a, &a, &a, &a, &a, AMOUNT, FEE_BPS, DEADLINE));
+    env.register(Escrow, (same_parties(&a), terms(&a, AMOUNT, FEE_BPS, DEADLINE)));
 }
 
 #[test]
@@ -269,4 +302,13 @@ fn a_positive_validation_does_not_unlock_an_early_refund() {
     s.client().fund();
     s.client().validate(&true, &s.report());
     assert_eq!(s.client().try_refund(), Err(Ok(Error::NotExpired)));
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #4)")]
+fn rejects_a_pool_yield_above_100_percent() {
+    let env = Env::default();
+    let a = Address::generate(&env);
+    let t = Terms { pool_yield_bps: 10_001, ..terms(&a, AMOUNT, FEE_BPS, DEADLINE) };
+    env.register(Escrow, (same_parties(&a), t));
 }

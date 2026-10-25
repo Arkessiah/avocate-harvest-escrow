@@ -20,6 +20,7 @@ struct Setup {
     treasury: Address,
     agent: Address,
     validator: Address,
+    pool: Address,
     token: Address,
     platform: Address,
 }
@@ -38,7 +39,9 @@ impl Setup {
         let wasm = env.deployer().upload_contract_wasm(escrow::WASM);
         let platform =
             env.register(Platform, (&admin, &token, &treasury, &agent, &validator, wasm, FEES));
-        Setup { env, admin, treasury, agent, validator, token, platform }
+        let pool = Address::generate(&env);
+        PlatformClient::new(&env, &platform).set_pool(&pool);
+        Setup { env, admin, treasury, agent, validator, pool, token, platform }
     }
 
     fn client(&self) -> PlatformClient<'_> {
@@ -74,6 +77,9 @@ fn escrow_snapshots_platform_terms() {
     assert_eq!(config.platform, s.treasury);
     assert_eq!(config.agent, s.agent);
     assert_eq!(config.validator, s.validator);
+    assert_eq!(config.pool, s.pool);
+    assert_eq!(config.financing_fee_bps, FEES.financing_fee_bps);
+    assert_eq!(config.pool_yield_bps, FEES.pool_yield_bps);
     assert_eq!(config.token, s.token);
     assert_eq!(config.trade_fee_bps, FEES.trade_fee_bps);
 }
@@ -180,4 +186,32 @@ fn agent_settles_a_validated_platform_trade() {
     trade.validate(&true, &BytesN::from_array(&s.env, &[9; 32]));
     trade.agent_release();
     assert_eq!(TokenClient::new(&s.env, &s.token).balance(&seller), 1_000 * USDC);
+}
+
+#[test]
+fn registry_recognises_its_own_escrows_only() {
+    let s = Setup::new();
+    let (_, _, escrow) = s.open_trade(USDC);
+    assert!(s.client().is_escrow(&escrow));
+    assert!(!s.client().is_escrow(&Address::generate(&s.env)));
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #2)")]
+fn trades_need_a_linked_pool() {
+    let env = Env::default();
+    env.mock_all_auths();
+    env.ledger().set_timestamp(1_000);
+    let a = Address::generate(&env);
+    let wasm = env.deployer().upload_contract_wasm(escrow::WASM);
+    let platform = env.register(Platform, (&a, &a, &a, &a, &a, wasm, FEES));
+    PlatformClient::new(&env, &platform).create_escrow(&a, &a, &USDC, &DEADLINE);
+}
+
+#[test]
+#[should_panic]
+fn non_admin_cannot_link_a_pool() {
+    let s = Setup::new();
+    s.env.set_auths(&[]);
+    s.client().set_pool(&Address::generate(&s.env));
 }
