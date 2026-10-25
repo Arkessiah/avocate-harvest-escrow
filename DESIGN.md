@@ -1,0 +1,113 @@
+# Design
+
+Visual system of the Avocate Harvest Escrow web app. Tokens defined here are the single
+source of truth: `web/tailwind.config.ts` and `web/src/app/globals.css` implement them and
+must change together with this file.
+
+The look follows Avocate's portal: emerald on a light mint background, frosted cards, quiet
+typography, and every on-chain step shown to the user as it happens.
+
+## Colour
+
+| Token | Hex | Use |
+|---|---|---|
+| `brand` | `#009E63` | Primary accent: active navigation, icons, large text, progress |
+| `brand-dark` | `#007A4D` | Text and links in the brand colour; hover state of primary buttons |
+| `brand-light` | `#4FD1A5` | Background glow only |
+| `ink` | `#0B1F17` | Body text |
+| `mist` | `#E8F5EF` | Page background |
+
+Text opacity steps on `ink`: 100% body, 70% secondary, 60% muted. Use alpha on `ink`
+(`text-ink/60`) rather than new greys.
+
+Trade states:
+
+| State | Badge |
+|---|---|
+| Pending | `bg-amber-100 text-amber-800` |
+| Funded | `bg-brand/10 text-brand-dark` |
+| Released | `bg-emerald-100 text-emerald-800` |
+| Refunded | `bg-rose-100 text-rose-800` |
+
+Errors: `border-rose-200 bg-rose-50/70 text-rose-700`.
+
+### Contrast (WCAG 2.1, measured)
+
+| Pair | Ratio | AA normal text (4.5:1) |
+|---|---|---|
+| `ink` on `mist` | 15.33:1 | pass |
+| `brand-dark` on `mist` | 4.82:1 | pass |
+| white on `brand-dark` | 5.40:1 | pass |
+| `ink/60` on white | 4.53:1 | pass |
+| white on `brand` | 3.46:1 | **fails** (large text only) |
+| `ink/40` on white | 2.52:1 | **fails** |
+
+Proposed, pending approval: primary buttons filled with `brand-dark` (hover darker) instead
+of `brand`, and `ink/60` as the lightest text colour. `brand` stays for accents, icons and
+large text.
+
+## Background
+
+`mist` with two soft radial glows, top-left `brand-light` at 25% and top-right `brand` at
+18%. No other gradients anywhere in the app.
+
+## Typography
+
+System sans stack (`ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto`). Weights:
+700 for the app title, 600 for headings and figures, 500 for buttons and labels, 400 for
+body. Hierarchy comes from weight and colour, not italics.
+
+| Role | Classes |
+|---|---|
+| App title | `text-2xl font-bold tracking-tight`, product name in `text-brand` |
+| Section title | `text-lg font-semibold` |
+| Label / eyebrow | `.label`: `text-xs font-medium uppercase tracking-wide text-ink/50` |
+| Addresses and hashes | `font-mono`, shortened `ABCDEF…UVWXYZ`, linked to the explorer |
+
+## Components
+
+| Class | Definition |
+|---|---|
+| `.card-glass` | `rounded-2xl border border-white/60 bg-white/70 shadow-sm backdrop-blur-md` |
+| `.btn-brand` | primary action, `rounded-xl px-4 py-2.5 font-medium text-white`, disabled at 50% opacity |
+| `.btn-ghost` | secondary action, `rounded-xl border border-brand/30 bg-white/60 text-brand-dark` |
+| `.input` | `rounded-xl border border-ink/10 bg-white/80 px-3 py-2 text-sm`, focus ring `brand/20` |
+| Stat tile | `rounded-xl bg-white/60 px-4 py-3`, label on top, value `text-lg font-semibold` |
+
+Radii: `rounded-xl` for controls and tiles, `rounded-2xl` for cards and dialogs, `rounded-full`
+for state badges only.
+
+## Layout and patterns
+
+- Page container `mx-auto max-w-5xl px-4 py-10`; single column on mobile, `lg:grid-cols-5`
+  (2 + 3) where a form sits next to the trade it creates.
+- **Header**: product name and tagline on the left; language switcher and wallet button on
+  the right; role navigation underneath as pills (active pill `bg-brand text-white`).
+- **Role intro**: every role page opens with a `bg-brand/5 border-brand/20` panel naming the
+  role, what it can do, and a hint that the URL can be shared to watch the same trade.
+- **Transaction dialog**: every on-chain action opens a modal listing each step as it
+  happens (build, simulate, sign, submit, confirmed), with a link to the explorer at the
+  end. Nothing on-chain happens silently.
+- **History**: the actions taken in this browser, newest first, each linked to its
+  transaction.
+- Money is shown in USDC with 2 decimals in the UI; amounts in base units (7 decimals) never
+  appear on screen.
+
+## Landing page
+
+English only. Animated isometric figure explaining the trade flow (built with the
+`anatomy`-based industrial design figures), Avocate and HackMeridian 2026 Lisbon logos,
+"Built on" Stellar (Soroban) and Circle (USDC), "security patterns by OpenZeppelin", and a
+visible beta notice: testnet only, no real money.
+
+## Language
+
+The app opens in English and can switch to Spanish or Portuguese. Copy is short, concrete
+and in the user's terms (price, advance, delivery), never in contract terms (`bps`, `i128`).
+
+## Accessibility
+
+- Text contrast at least 4.5:1 (see table above).
+- Every interactive element reachable by keyboard, with a visible focus ring.
+- Layouts checked at 320, 375, 414 and 768 px wide, with no horizontal scroll.
+- State is never conveyed by colour alone: badges carry the state name.
