@@ -18,29 +18,7 @@ Fee schedule (basis points, configurable by the platform admin):
 | `financing_fee_bps` | 20 (0.2%) | Farmer, on an advance from the pool (not wired yet) |
 | `pool_yield_bps` | 200 (2%) | Farmer, to pool depositors (not wired yet) |
 
-## Security and anti-fraud rules
-
-Every rule below is enforced on-chain and covered by tests.
-
-**Trade escrow**
-- Trade terms (parties, token, price, fees, agent, validator, pool, deadline) are fixed at creation; nobody can redirect the payout or change the amount.
-- Only the buyer can fund, confirm or claim a refund.
-- The validator attests a delivery **once**. A verdict that could be rewritten would let a negative attestation be swapped in later to unlock a refund.
-- The agent can only trigger the payout already agreed, and only after a conforming validation. It cannot choose recipients or amounts.
-- A refund before the deadline needs a non-conforming validation from the independent validator.
-- State changes before any token moves, so a trade can never be settled twice.
-
-**Platform**
-- Fee schedule, service accounts and escrow code are admin-only. Changes apply to new trades only; open trades keep the terms they were created with.
-- Only escrows deployed by the platform are listed in its registry, so an escrow created on custom terms cannot pass for an Avocate operation. `is_escrow` exposes that check in a single read for other contracts (the pool uses it before lending).
-- No trade can be opened until the admin links the financing pool, so every escrow knows from birth which pool may finance it.
-
-**Financing pool**
-- Idle cash is tracked internally, so sending USDC straight to the pool cannot move the share price.
-- Virtual shares and assets (the OpenZeppelin mitigation referenced by SEP-56) make the first-depositor inflation attack unprofitable; a deposit too small to mint a share is rejected instead of being lost to rounding.
-- Rounding always favours the pool, so repeated small operations cannot drain the other depositors.
-- Shares are not transferable and there are no allowances: only the owner can deposit their funds or redeem their shares.
-- Only idle cash can be withdrawn; money lent to farmers stays in the pool until it is repaid.
+Security and anti-fraud rules are listed in the [main README](../README.md#security-and-anti-fraud-rules).
 
 ## Build and test
 
