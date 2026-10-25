@@ -50,6 +50,7 @@ export function PayWithXlm({
       title: "Pay with XLM",
       detail: `Swap for ${formatUsdc(missing)} on Soroswap, then deposit ${formatUsdc(total)}`,
       kind: "escrow",
+      trade: trade.id,
       execute: (_s, onStep) => swapThenFund({ buyer, escrow: trade.id, usdcNeeded: missing, xlmMax: max }, onStep),
     });
     if (out) onDone();

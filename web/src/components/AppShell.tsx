@@ -1,6 +1,7 @@
 import { Suspense, type ReactNode } from "react";
 import { AppHeader } from "@/components/AppHeader";
 import { WalletError } from "@/components/WalletError";
+import { HistoryPanel } from "@/components/HistoryPanel";
 import { ROLES, type Role } from "@/lib/roles";
 
 export function AppShell({ role, children }: { role?: Role; children: ReactNode }) {
@@ -23,6 +24,8 @@ export function AppShell({ role, children }: { role?: Role; children: ReactNode 
       )}
 
       {children}
+
+      {role && <HistoryPanel tradePath={"trades" in ROLES[role] ? `/${role}` : "/buyer"} />}
 
       <footer className="mt-12 text-center text-xs text-ink/70">
         Beta on Stellar testnet. No real money moves here.

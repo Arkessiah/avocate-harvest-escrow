@@ -95,6 +95,7 @@ export function AdvanceApproval({
       title: "Approve advance",
       detail: `${formatUsdc(request!.principal)} paid by the pool to the farmer`,
       kind: "pool",
+      trade: request!.escrow,
       execute: (source, onStep) => submitAdvance(request!, source, onStep),
     });
     if (out) onDone();

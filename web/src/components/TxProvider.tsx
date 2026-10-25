@@ -5,11 +5,13 @@ import { useWallet } from "@/components/WalletProvider";
 import { TxDialog, type TxState } from "@/components/TxDialog";
 import { describeError, type ContractKind } from "@/lib/errors";
 import { invoke, type Invocation } from "@/lib/tx";
+import { addHistory } from "@/lib/history";
 
 type Executor = (source: string, onStep: (step: string) => void) => Promise<{ hash: string; result: unknown }>;
 
 // Either a plain contract call, or a custom sequence of steps (such as a co-signed advance).
-export type TxRequest = { title: string; detail: string; kind: ContractKind } & (
+// `trade` links the history entry to a trade when the call is not made on the escrow itself.
+export type TxRequest = { title: string; detail: string; kind: ContractKind; trade?: string } & (
   | (Invocation & { execute?: undefined })
   | { execute: Executor; wallet?: false }
 );
@@ -37,6 +39,10 @@ export function TxProvider({ children }: { children: ReactNode }) {
       try {
         const out = request.execute ? await request.execute(source, onStep) : await invoke(request, source, onStep);
         setState((s) => s && { ...s, status: "ok", hash: out.hash });
+        // A call on the escrow is about that trade; creating a trade returns the new one's address.
+        const created = typeof out.result === "string" && /^C[A-Z2-7]{55}$/.test(out.result) ? out.result : undefined;
+        const trade = request.trade ?? (!request.execute && kind === "escrow" ? request.contractId : created);
+        addHistory({ ts: Date.now(), title, detail, hash: out.hash || undefined, trade });
         return out;
       } catch (e) {
         setState((s) => s && { ...s, status: "error", error: describeError(e, kind) });

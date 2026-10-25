@@ -143,6 +143,7 @@ function AdvanceRequest({ trade, farmer, onDone }: { trade: Trade; farmer: strin
       title: "Request an advance",
       detail: `${formatUsdc(principal)} from the financing pool`,
       kind: "pool",
+      trade: trade.id,
       execute: async (_source, onStep) => ({
         hash: "",
         result: await signAdvanceRequest({ escrow: trade.id, principal, buyer: config.buyer, farmer }, onStep),

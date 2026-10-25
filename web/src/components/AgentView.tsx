@@ -37,6 +37,7 @@ function AgentActions({ trade, onDone }: ActionsProps) {
       title: "Agent releases the payment",
       detail: `${formatUsdc(toFarmer)} to the farmer`,
       kind: "escrow",
+      trade: trade.id,
       wallet: false,
       execute: (_s, onStep) => callService("/api/agent/release", { escrowId: trade.id }, onStep),
     });

@@ -46,6 +46,7 @@ function ValidatorActions({ trade, onDone }: ActionsProps) {
             title: verdict,
             detail: "Recorded by Avocate's demo validator",
             kind: "escrow",
+            trade: trade.id,
             wallet: false,
             execute: (_s, onStep) => callService("/api/validator/attest", { escrowId: trade.id, ok, report }, onStep),
           }
