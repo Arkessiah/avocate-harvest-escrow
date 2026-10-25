@@ -1,8 +1,6 @@
 # Thesis
 
-> **Farmers paid in seconds. Buyers pay only for what arrives.**
->
-> The same line opens the README, the landing page, the pitch deck and the Devpost submission.
+**Farmers paid in seconds. Buyers pay only for what arrives.**
 
 ## Who it is for
 Small and mid-sized farmers who sell their harvest to professional buyers in other countries, and those

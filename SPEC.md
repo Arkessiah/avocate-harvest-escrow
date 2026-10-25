@@ -1,7 +1,6 @@
 # Spec
 
-What the product does and how to check that it works. The why lives in [THESIS.md](THESIS.md), the look
-in [DESIGN.md](DESIGN.md), and the details of every rule in the [README](README.md).
+**Farmers paid in seconds. Buyers pay only for what arrives.**
 
 ## The demo path
 Everything happens on Stellar testnet with test USDC, at https://avocate-harvest-escrow.vercel.app.
