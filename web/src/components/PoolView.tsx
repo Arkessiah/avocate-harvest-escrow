@@ -87,10 +87,9 @@ export function PoolView() {
       </div>
 
       <section className="card p-6 lg:col-span-6">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-lg font-semibold">Open advances</h2>
-          <p className="text-sm text-ink/70">{pool ? `${pool.loans.length} open` : ""}</p>
-        </div>
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          Open advances {pool && <span className="chip">{pool.loans.length}</span>}
+        </h2>
         <p className="mt-1 text-sm text-ink/70">
           Money the pool has paid to farmers ahead of delivery. Each is repaid with its yield when the trade settles.
         </p>

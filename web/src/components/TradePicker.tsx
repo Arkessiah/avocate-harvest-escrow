@@ -57,7 +57,9 @@ export function TradePicker({
   return (
     <section className="card mb-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold">Trades on the platform</h2>
+        <h2 className="flex items-center gap-2 text-sm font-semibold">
+          Trades on the platform {trades && <span className="chip">{shown.length}</span>}
+        </h2>
         {narrow && (
           <div className="flex gap-1 rounded-lg bg-mist/70 p-1 text-xs font-medium" role="group" aria-label="Filter">
             {[
