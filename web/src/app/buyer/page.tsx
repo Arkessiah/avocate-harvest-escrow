@@ -1,12 +1,15 @@
+import { Suspense } from "react";
 import { AppShell } from "@/components/AppShell";
-import { ComingNext } from "@/components/ComingNext";
+import { BuyerView } from "@/components/BuyerView";
 
 export const metadata = { title: "Buyer · Avocate Harvest Escrow" };
 
 export default function Page() {
   return (
     <AppShell role="buyer">
-      <ComingNext />
+      <Suspense>
+        <BuyerView />
+      </Suspense>
     </AppShell>
   );
 }

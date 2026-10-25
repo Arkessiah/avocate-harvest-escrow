@@ -1,5 +1,6 @@
 import { Keypair, contract } from "@stellar/stellar-sdk";
 import { network } from "@/lib/network";
+import { variant } from "@/lib/chain";
 import { HttpError, RateLimiter, clientIp, describeContractError } from "@/lib/server/guard";
 
 // Server-only: signs with the service accounts (agent, validator). Secrets come from the
@@ -28,15 +29,6 @@ type Call = (args?: Record<string, unknown>, opts?: { timeoutInSeconds?: number 
   signAndSend: () => Promise<{ sendTransactionResponse?: { hash: string } }>;
 }>;
 const method = (c: contract.Client, name: string) => (c as unknown as Record<string, Call>)[name];
-
-// Unit enum variants decode as a string, a one-element array or `{ tag }` depending on how
-// they were read; callers only ever need the variant name.
-export function variant(value: unknown): string {
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) return String(value[0]);
-  if (value && typeof value === "object" && "tag" in value) return String((value as { tag: unknown }).tag);
-  return String(value);
-}
 
 export interface EscrowView {
   agent: string;
