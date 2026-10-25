@@ -85,6 +85,10 @@ body. Hierarchy comes from weight and colour, not italics.
 | `.input` | `rounded-xl border border-ink/10 bg-white/80 px-3 py-2 text-sm`, focus ring `brand/20` |
 | `.figure-xl` | Headline figures: Barlow Condensed, 48–60 px, light; the unit (USDC) beside it, smaller and muted |
 | `Ring` | Two-part progress ring in SVG (`brand-dark` arc on `surface` track) with its share in the centre and a legend beside it |
+| `Rings` | Concentric rings, one per part on its own track (admin: trades by state), total in the centre, legend with counts beside it |
+| Trade tiles | Every trade as one square, oldest first, coloured by state; what ended without a payout is hatched (`.hatch`) |
+| `.chip` | Count badge beside a section title (`bg-ink/5`, rounded-full, tabular) |
+| Dark card | One per app: the agent's console, `bg-ink` with `mist` text and a `highlight` button |
 
 Radii: `rounded-xl` for controls and tiles, `rounded-2xl` for cards and dialogs, `rounded-full`
 for state badges only.

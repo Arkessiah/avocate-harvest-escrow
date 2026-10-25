@@ -13,6 +13,7 @@ import { STATE_BADGE, formatDate, type Trade, type TradeState } from "@/lib/trad
 import { listTrades } from "@/lib/registry";
 import { readPool, type PoolState } from "@/lib/pool";
 import { describeError } from "@/lib/errors";
+import { Rings, type RingPart } from "@/components/Ring";
 
 interface Farmer {
   address: string;
@@ -82,7 +83,8 @@ export function AdminView() {
       )}
 
       <section aria-label="Platform overview" className="grid gap-4 lg:grid-cols-6">
-        <div className="card-highlight p-6 lg:col-span-4">
+        <div className="card-highlight flex flex-col gap-6 p-6 sm:flex-row sm:items-center lg:col-span-4">
+          <div className="min-w-0 flex-1">
           <h2 className="text-sm font-medium text-ink/70">Paid to farmers</h2>
           <p className="figure-xl mt-2">
             {amountOf(sum(["Released"]))} <span className="text-2xl text-ink/70">USDC</span>
@@ -101,6 +103,8 @@ export function AdminView() {
               <dd className="font-semibold">{formatUsdc(sum(["Funded"]))}</dd>
             </div>
           </dl>
+          </div>
+          <StateRings trades={data.trades} />
         </div>
         <div className="card flex flex-col justify-between gap-4 p-6 lg:col-span-2">
           <div>
@@ -122,6 +126,37 @@ export function AdminView() {
       </div>
 
       <Registry trades={data.trades} />
+    </div>
+  );
+}
+
+function StateRings({ trades }: { trades: Trade[] }) {
+  const count = (states: TradeState[]) => trades.filter((t) => states.includes(t.state)).length;
+  const parts: RingPart[] = [
+    { label: "Paid", value: count(["Released"]), stroke: "stroke-brand-dark", dot: "bg-brand-dark" },
+    { label: "In progress", value: count(["Funded"]), stroke: "stroke-brand", dot: "bg-brand" },
+    { label: "Awaiting deposit", value: count(["Pending"]), stroke: "stroke-pending", dot: "bg-pending" },
+    { label: "Refunded or cancelled", value: count(["Refunded", "Cancelled"]), stroke: "stroke-danger", dot: "bg-danger" },
+  ];
+  return (
+    <div className="flex items-center gap-4">
+      <div className="relative h-36 w-36 shrink-0">
+        <Rings parts={parts} total={trades.length} label="Trades by state" />
+        <span className="absolute inset-0 flex flex-col items-center justify-center leading-none" aria-hidden>
+          <span className="font-condensed text-3xl">{trades.length}</span>
+          <span className="mt-1 text-xs text-ink/70">trades</span>
+        </span>
+      </div>
+      <dl className="space-y-1.5 text-sm">
+        {parts.map((p) => (
+          <div key={p.label} className="flex items-center justify-between gap-4">
+            <dt className="flex items-center gap-1.5 text-ink/70">
+              <span className={`h-2 w-2 rounded-full ${p.dot}`} aria-hidden /> {p.label}
+            </dt>
+            <dd className="font-semibold">{p.value}</dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }
@@ -245,7 +280,9 @@ function FarmersCard({ farmers, isAdmin, onDone }: { farmers: Farmer[]; isAdmin:
 
   return (
     <section className="card p-6">
-      <h2 className="text-lg font-semibold">Farmers</h2>
+      <h2 className="flex items-center gap-2 text-lg font-semibold">
+        Farmers <span className="chip">{all.length}</span>
+      </h2>
       <p className="mt-1 text-sm text-ink/70">
         Only onboarded farmers can ask the pool for advances, up to their limit across all their open advances.
       </p>
@@ -304,6 +341,52 @@ function FarmersCard({ farmers, isAdmin, onDone }: { farmers: Farmer[]; isAdmin:
   );
 }
 
+const TILE: Record<TradeState, string> = {
+  Released: "bg-brand-dark",
+  Funded: "bg-brand",
+  Pending: "bg-pending-tint ring-1 ring-inset ring-pending/40",
+  Refunded: "hatch bg-danger-soft text-danger/60",
+  Cancelled: "hatch bg-surface text-ink/30",
+};
+
+// Every trade as one square, oldest first: the platform's activity at a glance.
+function TradeTiles({ trades }: { trades: Trade[] }) {
+  const ordered = [...trades].reverse();
+  const legend: [TradeState, string][] = [
+    ["Released", "Paid"],
+    ["Funded", "In progress"],
+    ["Pending", "Awaiting deposit"],
+    ["Refunded", "Refunded"],
+    ["Cancelled", "Cancelled"],
+  ];
+  return (
+    <div>
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h2 className="text-lg font-semibold">Trade activity</h2>
+        <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ink/70">
+          {legend.map(([key, label]) => (
+            <li key={key} className="flex items-center gap-1.5">
+              <span className={`h-3 w-3 rounded ${TILE[key]}`} aria-hidden /> {label}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(1.75rem,1fr))] gap-1.5" aria-label="Trades, oldest first">
+        {ordered.map((t) => (
+          <li key={t.id}>
+            <Link
+              href={`/buyer?trade=${t.id}`}
+              title={`${formatUsdc(t.config.amount)} · ${t.state}`}
+              aria-label={`${formatUsdc(t.config.amount)}, ${t.state}`}
+              className={`block aspect-square rounded-md transition hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-dark ${TILE[t.state]}`}
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 const FILTERS: ("All" | TradeState)[] = ["All", "Pending", "Funded", "Released", "Refunded", "Cancelled"];
 
 function Registry({ trades }: { trades: Trade[] }) {
@@ -313,8 +396,11 @@ function Registry({ trades }: { trades: Trade[] }) {
 
   return (
     <section className="card p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-semibold">All trades</h2>
+      <TradeTiles trades={trades} />
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          All trades <span className="chip">{trades.length}</span>
+        </h2>
         <div className="flex flex-wrap gap-1 rounded-lg bg-mist/70 p-1 text-xs font-medium" role="group" aria-label="Filter by state">
           {FILTERS.map((f) => (
             <button
