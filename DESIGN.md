@@ -100,6 +100,10 @@ for state badges only.
   navigation underneath as pills (active pill `bg-brand-dark text-white`).
 - **Role intro**: every role page opens with the role's name as the page title and one
   sentence on what it can do, as plain text (no box, so it never competes with the highlight).
+- **Trade card**: the price as the headline figure beside the state badge, then the trade's
+  timeline (created, funded, advance, validated, settled: done steps filled, the current one
+  ringed, skipped ones muted, a refund or cancellation in `danger`), then the details as a
+  flat list, then the role's actions. One containment layer: no boxes inside the card.
 - **Transaction dialog**: every on-chain action opens a modal listing each step as it
   happens (build, simulate, sign, submit, confirmed), with a link to the explorer at the
   end. Nothing on-chain happens silently.
