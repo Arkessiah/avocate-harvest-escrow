@@ -31,7 +31,7 @@ export function StatusView() {
     <AppShell>
       <h1 className="text-lg font-semibold">Farmers get paid in seconds once delivery is confirmed.</h1>
 
-      <section className="card-glass mt-4 p-6">
+      <section className="card mt-4 p-6">
         <p className="label">Network</p>
         <p className="font-medium">
           Stellar {network.name} · deployed {new Date(network.deployedAt).toLocaleString("en")}
@@ -59,7 +59,7 @@ export function StatusView() {
           <Stat label="Pool yield" value={fees ? pct(fees.pool_yield_bps) : "…"} />
           <Stat label="Trades" value={trades ?? "…"} />
         </div>
-        {error && <p className="mt-4 text-sm text-rose-700">{error}</p>}
+        {error && <p className="mt-4 text-sm text-danger">{error}</p>}
       </section>
     </AppShell>
   );
@@ -67,7 +67,7 @@ export function StatusView() {
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-xl bg-white/60 px-4 py-3">
+    <div className="rounded-xl bg-mist/70 px-4 py-3">
       <p className="label">{label}</p>
       <p className="text-lg font-semibold">{value}</p>
     </div>

@@ -52,7 +52,7 @@ export function AdvanceApproval({
   }, [code, address]);
 
   const frame = (body: React.ReactNode) => (
-    <section className="mb-6 rounded-2xl border-2 border-brand/40 bg-white/80 p-5 shadow-sm" aria-labelledby="advance-title">
+    <section className="mb-6 rounded-2xl border-2 border-brand/40 bg-surface p-5 shadow-sm" aria-labelledby="advance-title">
       <p className="label">Step 2 of 2 · Buyer</p>
       <h2 id="advance-title" className="text-lg font-semibold">
         The farmer asks for an advance
@@ -74,7 +74,7 @@ export function AdvanceApproval({
   if (error) {
     return frame(
       <div className="mt-3 space-y-3">
-        <p className="rounded-xl border border-rose-200 bg-rose-50/70 px-3 py-2 text-sm text-rose-700">{error}</p>
+        <p className="rounded-xl border border-danger-line bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>
         <button className="btn-ghost" onClick={onDismiss}>
           Dismiss
         </button>
@@ -83,7 +83,7 @@ export function AdvanceApproval({
   }
   if (!request || !trade) return frame(<p className="mt-3 text-sm text-ink/70">Reading the request…</p>);
   if (request.escrow !== trade.id) {
-    return frame(<p className="mt-3 text-sm text-rose-700">This request is for another trade ({short(request.escrow)}).</p>);
+    return frame(<p className="mt-3 text-sm text-danger">This request is for another trade ({short(request.escrow)}).</p>);
   }
 
   const { config } = trade;

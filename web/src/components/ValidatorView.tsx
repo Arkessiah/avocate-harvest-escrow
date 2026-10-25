@@ -90,12 +90,12 @@ function ValidatorActions({ trade, onDone }: ActionsProps) {
           <button className="btn-brand" onClick={() => decide(true, false)}>
             Delivery conforms
           </button>
-          <button className="btn-ghost text-rose-700" onClick={() => decide(false, false)}>
+          <button className="btn-ghost text-danger" onClick={() => decide(false, false)}>
             Reject delivery
           </button>
         </div>
       ) : (
-        <div className="space-y-3 rounded-xl bg-white/60 p-4">
+        <div className="space-y-3 rounded-xl bg-mist/70 p-4">
           <p className="text-sm text-ink/70">
             The trade's validator is {short(config.validator)}. Connect that wallet to sign, or, for this demo, let
             Avocate's demo validator record the verdict.
@@ -104,7 +104,7 @@ function ValidatorActions({ trade, onDone }: ActionsProps) {
             <button className="btn-brand" onClick={() => decide(true, true)}>
               Demo: delivery conforms
             </button>
-            <button className="btn-ghost text-rose-700" onClick={() => decide(false, true)}>
+            <button className="btn-ghost text-danger" onClick={() => decide(false, true)}>
               Demo: reject delivery
             </button>
           </div>

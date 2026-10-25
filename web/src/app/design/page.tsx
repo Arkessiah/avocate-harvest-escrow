@@ -10,10 +10,10 @@ const COLOURS = [
 ] as const;
 
 const STATES = [
-  ["Pending", "bg-amber-100 text-amber-800"],
+  ["Pending", "bg-pending-tint text-pending"],
   ["Funded", "bg-brand/10 text-brand-dark"],
-  ["Released", "bg-emerald-100 text-emerald-800"],
-  ["Refunded", "bg-rose-100 text-rose-800"],
+  ["Released", "bg-released-tint text-released"],
+  ["Refunded", "bg-danger-tint text-danger-strong"],
   ["Cancelled", "bg-ink/10 text-ink/80"],
 ] as const;
 
@@ -29,11 +29,11 @@ export default function Design() {
         <p className="mt-1 text-sm text-ink/70">Design tokens and components, as defined in DESIGN.md.</p>
       </header>
 
-      <section className="card-glass p-6">
+      <section className="card p-6">
         <p className="label">Colour</p>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
           {COLOURS.map(([name, hex, bg]) => (
-            <div key={name} className="overflow-hidden rounded-xl border border-ink/10 bg-white">
+            <div key={name} className="overflow-hidden rounded-xl border border-ink/10 bg-surface">
               <div className={`h-14 ${bg}`} />
               <div className="px-3 py-2 text-sm">
                 <p className="font-medium">{name}</p>
@@ -44,7 +44,7 @@ export default function Design() {
         </div>
       </section>
 
-      <section className="card-glass p-6">
+      <section className="card p-6">
         <p className="label">Typography</p>
         <p className="mt-3 text-2xl font-bold tracking-tight">App title</p>
         <p className="text-lg font-semibold">Section title</p>
@@ -53,7 +53,7 @@ export default function Design() {
         <p className="mt-2 font-mono text-sm text-brand-dark">CBHU4N…PZNXBF ↗</p>
       </section>
 
-      <section className="card-glass p-6">
+      <section className="card p-6">
         <p className="label">Buttons and inputs</p>
         <div className="mt-3 flex flex-wrap gap-3">
           <button className="btn-brand">Fund trade</button>
@@ -70,7 +70,7 @@ export default function Design() {
         </div>
       </section>
 
-      <section className="card-glass p-6">
+      <section className="card p-6">
         <p className="label">Trade states</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {STATES.map(([state, tone]) => (
@@ -88,9 +88,9 @@ export default function Design() {
         </p>
       </section>
 
-      <section className="card-glass p-6">
+      <section className="card p-6">
         <p className="label">Error message (sample)</p>
-        <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-sm text-rose-700">
+        <div className="mt-3 rounded-xl border border-danger-line bg-danger-soft px-4 py-3 text-sm text-danger">
           The contract rejected the call (NotValidated).
         </div>
         <p className="mt-2 text-xs text-ink/70">

@@ -22,7 +22,7 @@ export function CancelTrade({ trade, me, onDone }: { trade: Trade; me: string; o
   }
 
   return (
-    <button className="btn-ghost w-full text-rose-700" onClick={cancel}>
+    <button className="btn-ghost w-full text-danger" onClick={cancel}>
       Cancel trade
     </button>
   );

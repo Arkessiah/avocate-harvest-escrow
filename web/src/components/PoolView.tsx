@@ -29,7 +29,7 @@ export function PoolView() {
 
   return (
     <div className="space-y-6">
-      {error && <p className="card-glass p-6 text-sm text-rose-700">{error}</p>}
+      {error && <p className="card p-6 text-sm text-danger">{error}</p>}
 
       <section aria-label="Pool overview" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Pool value" value={pool ? formatUsdc(pool.totalAssets) : "…"} hint="Cash plus loans and their accrued yield" />
@@ -46,7 +46,7 @@ export function PoolView() {
         <div className="space-y-6 lg:col-span-2">
           <YourPosition position={position} pool={pool} onDone={refresh} />
         </div>
-        <section className="card-glass p-6 lg:col-span-3">
+        <section className="card p-6 lg:col-span-3">
           <h2 className="text-lg font-semibold">Open advances</h2>
           <p className="mt-1 text-sm text-ink/70">
             Money the pool has paid to farmers ahead of delivery. Each is repaid with its yield when the trade settles.
@@ -60,7 +60,7 @@ export function PoolView() {
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="card-glass px-4 py-3">
+    <div className="card px-4 py-3">
       <p className="label">{label}</p>
       <p className="text-lg font-semibold">{value}</p>
       {hint && <p className="mt-0.5 text-xs text-ink/70">{hint}</p>}
@@ -73,7 +73,7 @@ function YourPosition({ position, pool, onDone }: { position: Position | null; p
 
   if (!address) {
     return (
-      <section className="card-glass p-6">
+      <section className="card p-6">
         <h2 className="text-lg font-semibold">Your position</h2>
         <p className="mt-1 text-sm text-ink/70">Connect your wallet to deposit USDC and earn the yield farmers pay on advances.</p>
         <button className="btn-brand mt-4 w-full" onClick={connect}>
@@ -82,20 +82,20 @@ function YourPosition({ position, pool, onDone }: { position: Position | null; p
       </section>
     );
   }
-  if (!position) return <section className="card-glass p-6 text-sm text-ink/70">Reading your position…</section>;
+  if (!position) return <section className="card p-6 text-sm text-ink/70">Reading your position…</section>;
 
   const ownership =
     pool && pool.totalShares > 0n ? Number((position.shares * 10_000n) / pool.totalShares) / 100 : 0;
 
   return (
-    <section className="card-glass p-6">
+    <section className="card p-6">
       <h2 className="text-lg font-semibold">Your position</h2>
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-xl bg-white/60 px-3 py-2">
+        <div className="rounded-xl bg-mist/70 px-3 py-2">
           <dt className="label">Value</dt>
           <dd className="text-lg font-semibold">{formatUsdc(position.value)}</dd>
         </div>
-        <div className="rounded-xl bg-white/60 px-3 py-2">
+        <div className="rounded-xl bg-mist/70 px-3 py-2">
           <dt className="label">Share of the pool</dt>
           <dd className="text-lg font-semibold">{ownership.toFixed(2)}%</dd>
         </div>
@@ -177,7 +177,7 @@ function Amount({
           {action}
         </button>
       </div>
-      <p className={`mt-1 text-xs ${problem ? "text-rose-700" : "text-ink/70"}`}>{problem ?? help}</p>
+      <p className={`mt-1 text-xs ${problem ? "text-danger" : "text-ink/70"}`}>{problem ?? help}</p>
     </div>
   );
 }
@@ -206,7 +206,7 @@ function Loans({ loans }: { loans: Loan[] | null }) {
             </div>
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                overdue ? "bg-rose-100 text-rose-800" : "bg-brand/10 text-brand-dark"
+                overdue ? "bg-danger-tint text-danger-strong" : "bg-brand/10 text-brand-dark"
               }`}
             >
               {overdue ? "Overdue · counted as 0" : `Due ${formatDate(l.deadline)}`}

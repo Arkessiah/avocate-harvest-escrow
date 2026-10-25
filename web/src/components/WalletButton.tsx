@@ -9,7 +9,7 @@ export function WalletButton() {
   if (address) {
     return (
       <button
-        className="card-glass inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand-dark hover:bg-white"
+        className="card inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand-dark hover:bg-mist"
         onClick={disconnect}
         title="Disconnect wallet"
       >

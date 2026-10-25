@@ -16,7 +16,11 @@ typography, and every on-chain step shown to the user as it happens.
 | `brand-deep` | `#00653F` | Hover state of primary buttons |
 | `brand-light` | `#4FD1A5` | Background glow only |
 | `ink` | `#0B1F17` | Body text |
-| `mist` | `#E8F5EF` | Page background |
+| `mist` | `#E8F5EF` | Page background; tiles inside a card |
+| `surface` | `#F8FCFA` | Cards, dialogs, inputs: a white tinted toward the brand, never pure white |
+| `pending` / `pending-tint` | `#92400E` / `#FEF3C7` | Pending state |
+| `released` / `released-tint` | `#065F46` / `#D1FAE5` | Released state |
+| `danger` (+ `strong`, `tint`, `soft`, `line`) | `#BE123C` … | Errors, refunded state, destructive actions |
 
 Text opacity steps on `ink`: 100% body, 70% secondary and muted. 70% is the floor: lighter
 text fails contrast on `mist`. Use alpha on `ink` rather than new greys.
@@ -25,13 +29,14 @@ Trade states:
 
 | State | Badge |
 |---|---|
-| Pending | `bg-amber-100 text-amber-800` |
+| Pending | `bg-pending-tint text-pending` |
 | Funded | `bg-brand/10 text-brand-dark` |
-| Released | `bg-emerald-100 text-emerald-800` |
-| Refunded | `bg-rose-100 text-rose-800` |
+| Released | `bg-released-tint text-released` |
+| Refunded | `bg-danger-tint text-danger-strong` |
 | Cancelled | `bg-ink/10 text-ink/80` |
 
-Errors: `border-rose-200 bg-rose-50/70 text-rose-700`.
+Errors: `border-danger-line bg-danger-soft text-danger`. Every colour is a named token in
+`web/tailwind.config.ts`; components never use Tailwind's raw palette.
 
 ### Contrast (WCAG 2.1, measured)
 
@@ -51,8 +56,8 @@ text. `brand` is kept for accents, icons and large text.
 
 ## Background
 
-`mist` with two soft radial glows, top-left `brand-light` at 25% and top-right `brand` at
-18%. No other gradients anywhere in the app.
+Flat `mist`. No gradients, glows or blur anywhere: depth comes from a tinted surface on the
+mint page, not from effects. Numbers use tabular figures app-wide so amounts line up.
 
 ## Typography
 
@@ -73,7 +78,7 @@ body. Hierarchy comes from weight and colour, not italics.
 
 | Class | Definition |
 |---|---|
-| `.card-glass` | `rounded-2xl border border-white/60 bg-white/70 shadow-sm backdrop-blur-md` |
+| `.card` | `rounded-3xl border border-ink/[0.06] bg-surface`: solid, one containment layer |
 | `.btn-brand` | primary action, `bg-brand-dark hover:bg-brand-deep rounded-xl px-4 py-2.5 font-medium text-white`, disabled at 50% opacity |
 | `.btn-ghost` | secondary action, `rounded-xl border border-brand/30 bg-white/60 text-brand-dark` |
 | `.input` | `rounded-xl border border-ink/10 bg-white/80 px-3 py-2 text-sm`, focus ring `brand/20` |

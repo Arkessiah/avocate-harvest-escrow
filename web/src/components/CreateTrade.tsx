@@ -55,7 +55,7 @@ export function CreateTrade({ onCreated }: { onCreated: (id: string) => void }) 
   }
 
   return (
-    <section className="card-glass p-6">
+    <section className="card p-6">
       <h2 className="text-lg font-semibold">New trade</h2>
       <p className="mt-1 text-sm text-ink/70">
         Agree a price with the farmer. Creating the trade costs only the network fee; the money is locked in the next step.
@@ -98,7 +98,7 @@ export function CreateTrade({ onCreated }: { onCreated: (id: string) => void }) 
         </div>
 
         {amount && fee !== null && fees && (
-          <dl className="rounded-xl bg-white/60 px-4 py-3 text-sm">
+          <dl className="rounded-xl bg-mist/70 px-4 py-3 text-sm">
             <div className="flex justify-between">
               <dt className="text-ink/70">Price</dt>
               <dd>{formatUsdc(amount)}</dd>

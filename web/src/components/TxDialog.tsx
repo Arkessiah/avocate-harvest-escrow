@@ -36,7 +36,7 @@ export function TxDialog({ state, onClose }: { state: TxState | null; onClose: (
         role="dialog"
         aria-modal="true"
         aria-labelledby="tx-title"
-        className="my-auto flex max-h-[calc(100vh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-ink/10 bg-white shadow-xl"
+        className="my-auto flex max-h-[calc(100vh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-ink/10 bg-surface shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="shrink-0 border-b border-ink/5 px-5 py-4">
@@ -55,7 +55,7 @@ export function TxDialog({ state, onClose }: { state: TxState | null; onClose: (
               <li key={i} className="flex items-center gap-3 text-sm">
                 <span
                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs ${
-                    failed ? "bg-rose-100 text-rose-700" : pending ? "bg-brand/20 text-brand-dark" : "bg-brand-dark text-white"
+                    failed ? "bg-danger-tint text-danger" : pending ? "bg-brand/20 text-brand-dark" : "bg-brand-dark text-white"
                   }`}
                   aria-hidden
                 >
@@ -83,7 +83,7 @@ export function TxDialog({ state, onClose }: { state: TxState | null; onClose: (
             </div>
           )}
           {state.status === "error" && (
-            <p className="mb-3 rounded-xl border border-rose-200 bg-rose-50/70 px-3 py-2 text-sm text-rose-700">
+            <p className="mb-3 rounded-xl border border-danger-line bg-danger-soft px-3 py-2 text-sm text-danger">
               {state.error}
             </p>
           )}

@@ -63,10 +63,10 @@ export async function readTrade(id: string, registered = false): Promise<Trade> 
 }
 
 export const STATE_BADGE: Record<TradeState, string> = {
-  Pending: "bg-amber-100 text-amber-800",
+  Pending: "bg-pending-tint text-pending",
   Funded: "bg-brand/10 text-brand-dark",
-  Released: "bg-emerald-100 text-emerald-800",
-  Refunded: "bg-rose-100 text-rose-800",
+  Released: "bg-released-tint text-released",
+  Refunded: "bg-danger-tint text-danger-strong",
   Cancelled: "bg-ink/10 text-ink/80",
 };
 

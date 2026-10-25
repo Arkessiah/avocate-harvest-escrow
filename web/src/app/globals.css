@@ -8,15 +8,14 @@
 
 body {
   @apply bg-mist text-ink antialiased;
-  background-image:
-    radial-gradient(1200px 600px at 10% -10%, rgba(79, 209, 165, 0.25), transparent),
-    radial-gradient(900px 500px at 110% 10%, rgba(0, 158, 99, 0.18), transparent);
   min-height: 100vh;
+  /* Amounts, counts and dates line up in columns everywhere. */
+  font-variant-numeric: tabular-nums;
 }
 
 @layer components {
-  .card-glass {
-    @apply rounded-2xl border border-white/60 bg-white/70 shadow-sm backdrop-blur-md;
+  .card {
+    @apply rounded-3xl border border-ink/[0.06] bg-surface;
   }
   .btn-brand {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-dark px-4 py-2.5
@@ -25,14 +24,14 @@ body {
   }
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-xl border border-brand/30
-           bg-white/60 px-4 py-2.5 font-medium text-brand-dark transition hover:bg-white
+           bg-surface px-4 py-2.5 font-medium text-brand-dark transition hover:bg-brand/5
            disabled:cursor-not-allowed disabled:opacity-50;
   }
   .label {
     @apply mb-1 block text-xs font-medium uppercase tracking-wide text-ink/70;
   }
   .input {
-    @apply w-full rounded-xl border border-ink/10 bg-white/80 px-3 py-2 text-sm
+    @apply w-full rounded-xl border border-ink/15 bg-surface px-3 py-2 text-sm
            outline-none focus:border-brand/50 focus:ring-2 focus:ring-brand/20;
   }
 }

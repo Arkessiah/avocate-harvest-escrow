@@ -66,8 +66,8 @@ export function AdminView() {
   }, []);
   useEffect(refresh, [refresh]);
 
-  if (error) return <p className="card-glass p-6 text-sm text-rose-700">{error}</p>;
-  if (!data) return <p className="card-glass p-6 text-sm text-ink/70">Reading the platform from the network…</p>;
+  if (error) return <p className="card p-6 text-sm text-danger">{error}</p>;
+  if (!data) return <p className="card p-6 text-sm text-ink/70">Reading the platform from the network…</p>;
 
   const isAdmin = address === data.admin;
   const sum = (states: TradeState[]) =>
@@ -76,7 +76,7 @@ export function AdminView() {
   return (
     <div className="space-y-6">
       {!isAdmin && (
-        <p className="rounded-xl border border-brand/20 bg-white/60 px-4 py-3 text-sm text-ink/70">
+        <p className="rounded-xl border border-brand/20 bg-mist/70 px-4 py-3 text-sm text-ink/70">
           Read-only view. Changes need Avocate's admin wallet ({short(data.admin)}).
         </p>
       )}
@@ -101,7 +101,7 @@ export function AdminView() {
 
 function Stat({ label, value, hint, link }: { label: string; value: string; hint?: string; link?: string }) {
   return (
-    <div className="card-glass px-4 py-3">
+    <div className="card px-4 py-3">
       <p className="label">{label}</p>
       <p className="text-lg font-semibold">{link ? <Link href={link} className="hover:underline">{value}</Link> : value}</p>
       {hint && <p className="mt-0.5 text-xs text-ink/70">{hint}</p>}
@@ -142,7 +142,7 @@ function FeesCard({ fees, isAdmin, onDone }: { fees: Fees; isAdmin: boolean; onD
   }
 
   return (
-    <section className="card-glass p-6">
+    <section className="card p-6">
       <h2 className="text-lg font-semibold">Fees</h2>
       <p className="mt-1 text-sm text-ink/70">
         Each trade keeps the fees it was created with. A change applies to new trades only.
@@ -162,7 +162,7 @@ function FeesCard({ fees, isAdmin, onDone }: { fees: Fees; isAdmin: boolean; onD
               onChange={(e) => setValues({ ...values, [f.key]: e.target.value })}
               aria-invalid={parsed[i] === null}
             />
-            <p className={`mt-1 text-xs ${parsed[i] === null ? "text-rose-700" : "text-ink/70"}`}>
+            <p className={`mt-1 text-xs ${parsed[i] === null ? "text-danger" : "text-ink/70"}`}>
               {parsed[i] === null ? "Enter a percent between 0 and 100, with up to two decimals." : f.who}
             </p>
           </div>
@@ -225,7 +225,7 @@ function FarmersCard({ farmers, isAdmin, onDone }: { farmers: Farmer[]; isAdmin:
   }
 
   return (
-    <section className="card-glass p-6">
+    <section className="card p-6">
       <h2 className="text-lg font-semibold">Farmers</h2>
       <p className="mt-1 text-sm text-ink/70">
         Only onboarded farmers can ask the pool for advances, up to their limit across all their open advances.
@@ -241,7 +241,7 @@ function FarmersCard({ farmers, isAdmin, onDone }: { farmers: Farmer[]; isAdmin:
               </p>
             </div>
             {isAdmin && f.limit !== null && (
-              <button className="text-sm text-rose-700 hover:underline" onClick={() => offboard(f.address)}>
+              <button className="text-sm text-danger hover:underline" onClick={() => offboard(f.address)}>
                 Offboard
               </button>
             )}
@@ -293,10 +293,10 @@ function Registry({ trades }: { trades: Trade[] }) {
   const count = (f: (typeof FILTERS)[number]) => (f === "All" ? trades.length : trades.filter((t) => t.state === f).length);
 
   return (
-    <section className="card-glass p-6">
+    <section className="card p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-semibold">All trades</h2>
-        <div className="flex flex-wrap gap-1 rounded-lg bg-white/60 p-1 text-xs font-medium" role="group" aria-label="Filter by state">
+        <div className="flex flex-wrap gap-1 rounded-lg bg-mist/70 p-1 text-xs font-medium" role="group" aria-label="Filter by state">
           {FILTERS.map((f) => (
             <button
               key={f}

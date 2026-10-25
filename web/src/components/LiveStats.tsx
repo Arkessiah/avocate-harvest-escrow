@@ -38,17 +38,17 @@ export function LiveStats() {
   ];
 
   return (
-    <div className="card-glass p-5">
+    <div className="card p-5">
       <div className="flex items-center justify-between gap-3">
         <p className="label">Live on Stellar {network.name}</p>
         <span className="inline-flex items-center gap-1.5 text-xs text-ink/70">
-          <span className={`h-2 w-2 rounded-full ${failed ? "bg-rose-500" : "bg-brand"}`} aria-hidden />
+          <span className={`h-2 w-2 rounded-full ${failed ? "bg-danger" : "bg-brand"}`} aria-hidden />
           {failed ? "Network unreachable" : "Read from the contracts"}
         </span>
       </div>
       <dl className="mt-3 grid grid-cols-2 gap-3">
         {rows.map(([label, value]) => (
-          <div key={label} className="rounded-xl bg-white/60 px-3 py-2">
+          <div key={label} className="rounded-xl bg-mist/70 px-3 py-2">
             <dt className="text-xs text-ink/70">{label}</dt>
             <dd className="text-lg font-semibold">{value}</dd>
           </div>

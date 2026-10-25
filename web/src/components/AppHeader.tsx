@@ -37,7 +37,7 @@ export function AppHeader() {
               href={href + query}
               aria-current={active ? "page" : undefined}
               className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                active ? "bg-brand-dark text-white" : "bg-white/60 text-ink/70 hover:bg-white hover:text-ink"
+                active ? "bg-brand-dark text-white" : "bg-mist/70 text-ink/70 hover:bg-mist hover:text-ink"
               }`}
             >
               {label}

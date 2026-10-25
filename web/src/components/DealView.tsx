@@ -39,7 +39,7 @@ export function DealView() {
 
   if (!code) {
     return (
-      <p className="card-glass p-6 text-sm text-ink/70">
+      <p className="card p-6 text-sm text-ink/70">
         Open this page from a trade proposal link or by scanning its QR code. To propose one, go to the{" "}
         <Link href="/buyer" className="text-brand-dark hover:underline">
           buyer
@@ -54,7 +54,7 @@ export function DealView() {
   }
 
   const frame = (body: React.ReactNode) => (
-    <section className="card-glass mx-auto max-w-xl p-6">
+    <section className="card mx-auto max-w-xl p-6">
       <p className="label">Step 2 of 2</p>
       <h1 className="text-xl font-semibold">A trade proposal for you</h1>
       {body}
@@ -86,7 +86,7 @@ export function DealView() {
     );
   }
   if (error) {
-    return frame(<p className="mt-3 rounded-xl border border-rose-200 bg-rose-50/70 px-3 py-2 text-sm text-rose-700">{error}</p>);
+    return frame(<p className="mt-3 rounded-xl border border-danger-line bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>);
   }
   if (!deal) return frame(<p className="mt-3 text-sm text-ink/70">Reading the proposal…</p>);
 
@@ -110,29 +110,29 @@ export function DealView() {
         {short(deal.proposer)} has signed these terms and asks you, as the {me}, to sign them too.
       </p>
       <dl className="grid grid-cols-2 gap-3 text-sm">
-        <div className="col-span-2 rounded-xl bg-white/60 px-3 py-2">
+        <div className="col-span-2 rounded-xl bg-mist/70 px-3 py-2">
           <dt className="label">Price</dt>
           <dd className="text-2xl font-semibold">{formatUsdc(deal.amount)}</dd>
         </div>
-        <div className="rounded-xl bg-white/60 px-3 py-2">
+        <div className="rounded-xl bg-mist/70 px-3 py-2">
           <dt className="label">Buyer</dt>
           <dd className="font-mono">
             {short(deal.buyer, 4)}
             {me === "buyer" && " (you)"}
           </dd>
         </div>
-        <div className="rounded-xl bg-white/60 px-3 py-2">
+        <div className="rounded-xl bg-mist/70 px-3 py-2">
           <dt className="label">Farmer</dt>
           <dd className="font-mono">
             {short(deal.seller, 4)}
             {me === "farmer" && " (you)"}
           </dd>
         </div>
-        <div className="rounded-xl bg-white/60 px-3 py-2">
+        <div className="rounded-xl bg-mist/70 px-3 py-2">
           <dt className="label">Deadline</dt>
           <dd>{formatDate(deal.deadline)}</dd>
         </div>
-        <div className="rounded-xl bg-white/60 px-3 py-2">
+        <div className="rounded-xl bg-mist/70 px-3 py-2">
           <dt className="label">Trade fee</dt>
           <dd>{fees && fee !== null ? `${formatUsdc(fee)} (${pct(fees.trade_fee_bps)}, paid by the buyer)` : "…"}</dd>
         </div>

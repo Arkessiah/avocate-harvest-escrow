@@ -14,9 +14,9 @@ interface Step {
 }
 
 const BADGE: Record<Step["outcome"], string> = {
-  released: "bg-emerald-100 text-emerald-800",
-  skipped: "bg-amber-100 text-amber-800",
-  failed: "bg-rose-100 text-rose-800",
+  released: "bg-released-tint text-released",
+  skipped: "bg-pending-tint text-pending",
+  failed: "bg-danger-tint text-danger-strong",
 };
 
 const Tx = ({ label, hash }: { label: string; hash?: string }) =>
@@ -48,7 +48,7 @@ export function AgentRun({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <section className="card-glass mb-6 p-6">
+    <section className="card mb-6 p-6">
       <h2 className="text-lg font-semibold">Autonomous agent</h2>
       <p className="mt-1 text-sm text-ink/70">
         For each trade ready to settle, the agent buys the validator's delivery check for 0.01 USDC over x402, compares it
@@ -57,7 +57,7 @@ export function AgentRun({ onDone }: { onDone: () => void }) {
       <button className="btn-brand mt-4" onClick={run} disabled={running} aria-busy={running}>
         {running ? "Running: paying for checks and settling…" : "Run the agent"}
       </button>
-      {error && <p className="mt-3 rounded-xl border border-rose-200 bg-rose-50/70 px-3 py-2 text-sm text-rose-700">{error}</p>}
+      {error && <p className="mt-3 rounded-xl border border-danger-line bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>}
       {result && (
         <div className="mt-4" aria-live="polite">
           <p className="text-sm text-ink/70">

@@ -50,8 +50,8 @@ export function BuyerView() {
         </div>
         <div className="lg:col-span-3">
           <TradePicker current={tradeId} onSelect={setTradeId} party="buyer" version={version} />
-          {error && <p className="card-glass p-6 text-sm text-rose-700">{error}</p>}
-          {loading && !trade && <p className="card-glass p-6 text-sm text-ink/70">Reading the trade from the network…</p>}
+          {error && <p className="card p-6 text-sm text-danger">{error}</p>}
+          {loading && !trade && <p className="card p-6 text-sm text-ink/70">Reading the trade from the network…</p>}
           {trade && (
             <TradeCard trade={trade}>
               <BuyerActions trade={trade} onDone={changed} />
@@ -94,7 +94,7 @@ function BuyerActions({ trade, onDone }: { trade: Trade; onDone: () => void }) {
           trade's rules.
         </p>
         {balance !== null && (
-          <p className={`text-sm ${short ? "text-rose-700" : "text-ink/70"}`}>
+          <p className={`text-sm ${short ? "text-danger" : "text-ink/70"}`}>
             Your balance: {formatUsdc(balance)}
             {short && " — not enough for this deposit."}
           </p>

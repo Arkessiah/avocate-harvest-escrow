@@ -13,7 +13,7 @@ export function TradeCard({ trade, children }: { trade: Trade; children?: ReactN
   const you = (a: string) => (a === address ? " (you)" : "");
 
   return (
-    <article className="card-glass overflow-hidden">
+    <article className="card overflow-hidden">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/5 px-6 py-4">
         <div>
           <p className="label">Trade</p>
@@ -49,7 +49,7 @@ export function TradeCard({ trade, children }: { trade: Trade; children?: ReactN
         )}
       </dl>
 
-      {children && <div className="border-t border-ink/5 bg-white/40 px-6 py-5">{children}</div>}
+      {children && <div className="border-t border-ink/5 bg-mist/40 px-6 py-5">{children}</div>}
     </article>
   );
 }

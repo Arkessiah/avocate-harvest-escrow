@@ -68,7 +68,7 @@ export function ProposeDeal({ side }: { side: "buyer" | "farmer" }) {
 
   if (link) {
     return (
-      <section className="card-glass p-6">
+      <section className="card p-6">
         <p className="label">Step 1 of 2 done</p>
         <h2 className="text-lg font-semibold">Show this to the {other}</h2>
         <p className="mt-1 text-sm text-ink/70">
@@ -94,7 +94,7 @@ export function ProposeDeal({ side }: { side: "buyer" | "farmer" }) {
   const fee = amount && fees ? bps(amount, fees.trade_fee_bps) : null;
 
   return (
-    <section className="card-glass p-6">
+    <section className="card p-6">
       <h2 className="text-lg font-semibold">Agree a trade on the spot</h2>
       <p className="mt-1 text-sm text-ink/70">
         Both of you sign the terms. You propose and sign first; the {other} completes it from a link, or by scanning a QR
