@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { connectWallet, disconnectWallet } from "@/lib/wallet";
-import { describeError } from "@/lib/errors";
+import { closedByUser, describeError } from "@/lib/errors";
 
 interface WalletState {
   address: string | null;
@@ -27,7 +27,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setAddress(a);
       return a;
     } catch (e) {
-      setError(describeError(e));
+      if (!closedByUser(e)) setError(describeError(e));
       return null;
     } finally {
       setConnecting(false);

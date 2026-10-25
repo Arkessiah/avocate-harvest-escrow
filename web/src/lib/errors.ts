@@ -40,8 +40,20 @@ export type ContractKind = keyof typeof CONTRACT_ERRORS;
 
 // Simulation and submission failures carry the whole diagnostic log. The user needs one
 // line: the contract error name when there is one, or the common wallet and account cases.
+// The wallet kit rejects with plain objects such as { code: -1, message: "..." }, not Errors.
+const messageOf = (e: unknown): string => {
+  if (e instanceof Error) return e.message;
+  if (typeof e === "string") return e;
+  const m = (e as { message?: unknown } | null)?.message;
+  return typeof m === "string" ? m : JSON.stringify(e);
+};
+
+// Closing the wallet's own window is a choice, not a failure.
+export const closedByUser = (e: unknown) => /closed the modal|user closed/i.test(messageOf(e));
+
 export function describeError(e: unknown, kind?: ContractKind): string {
-  const raw = e instanceof Error ? e.message : typeof e === "string" ? e : JSON.stringify(e);
+  const raw = messageOf(e);
+  if (closedByUser(e)) return "The wallet window was closed before confirming.";
   const code = /Error\(Contract, #(\d+)\)/.exec(raw)?.[1];
   if (code) {
     const name = kind ? CONTRACT_ERRORS[kind][Number(code) - 1] : undefined;
