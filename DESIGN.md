@@ -46,7 +46,7 @@ Errors: `border-rose-200 bg-rose-50/70 text-rose-700`.
 | `ink/40` on white | 2.52:1 | **fails** |
 
 Hence primary buttons are filled with `brand-dark` (not `brand`), and `ink/70` is the lightest
-text. `brand` is kept for accents, icons, the active navigation pill and large text.
+text. `brand` is kept for accents, icons and large text.
 
 ## Background
 
@@ -55,13 +55,15 @@ text. `brand` is kept for accents, icons, the active navigation pill and large t
 
 ## Typography
 
-System sans stack (`ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto`). Weights:
+System sans stack (`ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto`) for
+everything, plus Barlow Condensed (served by the app through `next/font`) for the product
+name only. Weights:
 700 for the app title, 600 for headings and figures, 500 for buttons and labels, 400 for
 body. Hierarchy comes from weight and colour, not italics.
 
 | Role | Classes |
 |---|---|
-| App title | `text-2xl font-bold tracking-tight`, product name in `text-brand` |
+| App title | "AVOCATE" in capitals, `text-2xl font-bold` in `ink`; "Harvest Escrow" in Barlow Condensed light (`font-condensed font-light`) in `brand-dark` |
 | Section title | `text-lg font-semibold` |
 | Label / eyebrow | `.label`: `text-xs font-medium uppercase tracking-wide text-ink/70` |
 | Addresses and hashes | `font-mono`, shortened `ABCDEF…UVWXYZ`, linked to the explorer |
@@ -83,8 +85,9 @@ for state badges only.
 
 - Page container `mx-auto max-w-5xl px-4 py-10`; single column on mobile, `lg:grid-cols-5`
   (2 + 3) where a form sits next to the trade it creates.
-- **Header**: product name and tagline on the left; language switcher and wallet button on
-  the right; role navigation underneath as pills (active pill `bg-brand text-white`).
+- **Header**: the app title as text on the left (the Avocate logo is used only on the landing
+  page, never inside the app); language switcher and wallet button on the right; role
+  navigation underneath as pills (active pill `bg-brand-dark text-white`).
 - **Role intro**: every role page opens with a `bg-brand/5 border-brand/20` panel naming the
   role, what it can do, and a hint that the URL can be shared to watch the same trade.
 - **Transaction dialog**: every on-chain action opens a modal listing each step as it
