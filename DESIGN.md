@@ -102,8 +102,8 @@ for state badges only.
 
 English only, at `/`; the app starts at `/overview`. Left-aligned hero with live numbers
 read from the contracts, then problem and answer, the five steps of a trade, the anti-fraud
-rules and a FAQ (also published as FAQPage structured data). The Avocate wordmark appears
-here and nowhere else. A dark strip at the very top states the beta: testnet only, no real
+rules and a FAQ (also published as FAQPage structured data). The product name is set in
+text everywhere, landing included, as in the app header: no logo image. A dark strip at the very top states the beta: testnet only, no real
 money.
 
 "Built on" shows the Stellar, USDC and OpenZeppelin logos exactly as published by their

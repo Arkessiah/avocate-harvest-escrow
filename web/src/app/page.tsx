@@ -71,9 +71,9 @@ export default function Landing() {
       </p>
 
       <header className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 pt-8">
-        <Link href="/" className="flex items-center gap-3" aria-label="Avocate Harvest Escrow, home">
-          <Image src="/logos/avocate-wordmark-dark.png" alt="Avocate" width={114} height={48} priority />
-          <span className="font-condensed text-2xl font-light text-brand-dark">Harvest Escrow</span>
+        <Link href="/" className="flex items-baseline gap-2" aria-label="Avocate Harvest Escrow, home">
+          <span className="text-2xl font-bold tracking-wide text-ink">AVOCATE</span>
+          <span className="font-condensed text-[1.7rem] font-light leading-none text-brand-dark">Harvest Escrow</span>
         </Link>
         <Link href="/overview" className="btn-brand">
           Enter the app
