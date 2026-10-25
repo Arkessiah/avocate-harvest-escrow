@@ -327,10 +327,13 @@ const COIN = (
 const LABEL =
   "A farm sale drawn as a bench-top machine with two rows moving in opposite directions. At the back, money: the buyer's dispenser drops USDC coins into an escrow vault whose door counts the money locked; a financing pool tank sends an advance down a pipe into the farmer's till; once the delivery is approved the vault pays the pool back first through a chute into its hopper, then pays the farmer through a second chute. At the front, goods: a crate of avocados leaves the orchard on a conveyor, is weighed on an inspection scale whose dial needle swings, receives the validator's green seal from a press, and rides on to the buyer's end of the belt.";
 
-export function HarvestArt() {
+export function HarvestArt({ steps, paused, playing }: { steps: string[]; paused: string; playing: string }) {
   return (
     <HarvestLive
       label={LABEL}
+      steps={steps}
+      paused={paused}
+      playing={playing}
       base={BASE}
       orchard={ORCHARD}
       pay={PAY}

@@ -81,7 +81,8 @@ export interface Pose {
   level: string;
   surface: string;
   locked: number;
-  step: string;
+  // Index into the readout lines, which come translated from the page.
+  step: number;
 }
 
 const HIDDEN: Coin = { shift: [0, 0], opacity: 0 };
@@ -137,16 +138,14 @@ function crateOpacity(t: number) {
   return smooth((t - BACK.from) / (BACK.to - BACK.from));
 }
 
-const usd = (n: number) => n.toLocaleString("en");
-
 function stepAt(t: number) {
-  if (t < MOVE_IN.from) return `Buyer locks ${usd(PRICE)} USDC`;
-  if (t < LEND.start + 0.6) return "Crate leaves the orchard";
-  if (t < WEIGH.up) return `Pool advances ${usd(ADVANCE)} USDC to the farmer`;
-  if (t < PRESS.down) return "Crate weighed at the scale";
-  if (t < REPAY.start) return "Validator: delivery conforms";
-  if (t < PAY.start + PAY.run) return `Vault pays: pool repaid ${usd(REPAID)} USDC, farmer receives the rest`;
-  return "Goods delivered. Ready for the next trade";
+  if (t < MOVE_IN.from) return 0;
+  if (t < LEND.start + 0.6) return 1;
+  if (t < WEIGH.up) return 2;
+  if (t < PRESS.down) return 3;
+  if (t < REPAY.start) return 4;
+  if (t < PAY.start + PAY.run) return 5;
+  return 6;
 }
 
 export function poseAt(time: number): Pose {

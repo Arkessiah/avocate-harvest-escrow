@@ -3,23 +3,35 @@ import { HarvestArt } from "./art";
 import { ADVANCE, PRICE, REPAID } from "./model";
 import "./kit/iso.css";
 import "./harvest.css";
+import { LANDING, type LandingCopy } from "@/lib/landing-copy";
 
 // The landing page's figure: one farm sale on Avocate, drawn as a machine on a bench.
-export function HarvestFigure() {
+export function HarvestFigure({
+  copy = LANDING.en.figure,
+  locale = "en",
+}: {
+  copy?: LandingCopy["figure"];
+  locale?: string;
+}) {
+  const n = (v: number) => v.toLocaleString(locale);
   return (
     <div className="iso hf" data-theme="light">
       <Plate
         fig="Fig 1"
-        title="One harvest, one escrow"
-        hint="Click to pause"
-        readout="Validator: delivery conforms"
+        title={copy.title}
+        hint={copy.hint}
+        readout={copy.readout}
         keys={[
-          { mark: "raised", label: "USDC coins" },
-          { mark: "lit", label: "The validator's seal" },
+          { mark: "raised", label: copy.coins },
+          { mark: "lit", label: copy.seal },
         ]}
-        caption={`Money moves along the back, goods along the front. The buyer locks ${PRICE.toLocaleString("en")} USDC in the vault and the pool advances ${ADVANCE.toLocaleString("en")} USDC to the farmer while the crate leaves the orchard. The crate is weighed and sealed by the validator, then the vault repays the pool ${REPAID.toLocaleString("en")} USDC (the advance plus 2%) and pays the farmer the rest.`}
+        caption={copy.caption(n(PRICE), n(ADVANCE), n(REPAID))}
       >
-        <HarvestArt />
+        <HarvestArt
+          steps={copy.steps(n(PRICE), n(ADVANCE), n(REPAID))}
+          paused={copy.paused}
+          playing={copy.playing}
+        />
       </Plate>
     </div>
   );

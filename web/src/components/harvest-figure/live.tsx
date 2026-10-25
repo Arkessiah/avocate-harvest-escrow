@@ -12,6 +12,10 @@ const REST = poseAt(STILL_TIME);
 
 interface Props {
   label: string;
+  // The seven readout lines, in the page's language, indexed by Pose.step.
+  steps: string[];
+  paused: string;
+  playing: string;
   base: React.ReactNode;
   orchard: React.ReactNode;
   pay: React.ReactNode;
@@ -50,7 +54,7 @@ export function HarvestLive(props: Props) {
   const counter = React.useRef<SVGTextElement | null>(null);
   const root = React.useRef<HTMLDivElement | null>(null);
   const clock = React.useRef(STILL_TIME);
-  const lastStep = React.useRef("");
+  const lastStep = React.useRef(-1);
   const [visible, setVisible] = React.useState(false);
   const [paused, setPaused] = React.useState(false);
 
@@ -75,7 +79,7 @@ export function HarvestLive(props: Props) {
       if (counter.current && counter.current.textContent !== text) counter.current.textContent = text;
       if (pose.step !== lastStep.current) {
         lastStep.current = pose.step;
-        say(pose.step);
+        say(props.steps[pose.step]);
       }
     },
     [say],
@@ -135,7 +139,7 @@ export function HarvestLive(props: Props) {
       role="button"
       tabIndex={0}
       aria-pressed={paused}
-      aria-label={paused ? "Animation paused. Press to play the trade again." : "Animation playing. Press to pause it."}
+      aria-label={paused ? props.paused : props.playing}
       onClick={() => setPaused((p) => !p)}
       onKeyDown={(event) => {
         if (event.key === " " || event.key === "Enter") {
