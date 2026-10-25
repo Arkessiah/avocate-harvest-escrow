@@ -14,5 +14,12 @@
     "financing_fee_bps": 20,
     "pool_yield_bps": 200
   },
-  "max_advance_bps": 8000
+  "max_advance_bps": 8000,
+  "xlm": {
+    "contract": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
+  },
+  "soroswap": {
+    "router": "CCJUD55AG6W5HAI5LRVNKAE5WDP5XGZBUDS5WNTIVDU7O264UZZE7BRD",
+    "source": "https://api.soroswap.finance/api/testnet/router"
+  }
 }

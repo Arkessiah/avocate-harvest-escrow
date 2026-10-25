@@ -27,6 +27,10 @@ export const network = {
   explorerTx: selected.config.explorer_tx,
   explorerContract: selected.config.explorer_tx.replace(/\/tx\/$/, "/contract/"),
   usdc: selected.config.usdc,
+  xlm: selected.config.xlm,
+  // Soroswap's router on this network. On testnet it moves when the network is reset; the
+  // current address is published at `soroswap.source`.
+  soroswap: selected.config.soroswap,
   // Deploy-time value of the pool's advance cap; the contract stays the authority.
   maxAdvanceBps: selected.config.max_advance_bps,
   contracts: selected.deployment.contracts,
