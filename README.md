@@ -99,6 +99,16 @@ that is built.
 - **Paying in XLM (Soroswap).** A buyer short of USDC can pay the difference in XLM: Soroswap's router swaps exactly the USDC missing (`swap_tokens_for_exact_tokens`), with the XLM capped at the quote plus 1%, so a price move beyond that makes the swap fail instead of overcharging. The escrow itself only ever receives USDC. The router address lives in `deploy/networks/<network>.json` (on testnet it changes when the network is reset).
 - Trade proposals work the same way: the link or QR code carries the compressed transaction, the receiving screen checks it is a single `create_trade` call on the Avocate platform prepared for the connected account, shows the terms read from it, and the proposer's signature expires after one hour. A damaged or oversized payload is refused before it is decoded.
 
+## Security audits
+
+| Date | Scope | Tools | Result |
+|---|---|---|---|
+| 25 Oct 2026 | Escrow, platform and financing pool contracts (v0.0.3, commit `e58f8a0`) | [CoinFabrik Scout](https://github.com/CoinFabrik/scout-soroban) 0.3.17, plus a manual line-by-line review against the rules above and the official Stellar smart-contract security guidance, with proof-of-concept tests | 19 findings (3 high, 3 medium, 7 low, 6 informational). 5 fixed and 1 partly fixed in v0.0.4, 3 mitigated, the rest accepted or scheduled before mainnet |
+
+Full report: **[security audit (PDF)](audits/2026-10-25-security-audit.pdf)** · [source](audits/2026-10-25-security-audit.md).
+
+The fixes made after the audit (no refund after a conforming delivery, the loss booked at the rejection, yield charged in proportion to time, deposits paused while an advance is overdue, deadline refunds open to anyone, and an upgradeable pool v2) are in the rules above, each tagged with its finding. This was an internal review by the project team, not an independent audit; one is planned before any mainnet deployment.
+
 ## Status
 
 | Piece | State |
@@ -107,6 +117,7 @@ that is built.
 | Platform (fees, escrow factory, registry, upgrade) | Built, tested, deployed on testnet |
 | Financing pool: deposits and withdrawals (SEP-56) | Built and tested |
 | Financing pool: advances to farmers, repayment, losses | Built and tested; pool v2 deployed on testnet after the audit (upgradeable) |
+| Security audit | Done (Scout + manual review), fixes deployed in v0.0.4: [report](audits/2026-10-25-security-audit.pdf) |
 | Pool and financing on testnet | Deployed; two financed trades run end to end ([report](deploy/deployments/testnet-smoke.md)) |
 | Web app | Live at https://avocate-harvest-escrow.vercel.app: screens for buyer, farmer (co-signed advances), pool depositor, validator, agent and Avocate admin, plus a landing page with SEO and AI-crawler metadata. Languages in progress |
 | Agent with x402 payments | Live: buys the validator's delivery check over x402 before each release |
