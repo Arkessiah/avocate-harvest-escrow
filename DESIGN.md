@@ -29,6 +29,7 @@ Trade states:
 | Funded | `bg-brand/10 text-brand-dark` |
 | Released | `bg-emerald-100 text-emerald-800` |
 | Refunded | `bg-rose-100 text-rose-800` |
+| Cancelled | `bg-ink/10 text-ink/80` |
 
 Errors: `border-rose-200 bg-rose-50/70 text-rose-700`.
 

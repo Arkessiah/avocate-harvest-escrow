@@ -6,6 +6,7 @@ import { useTx } from "@/components/TxProvider";
 import { TradeCard } from "@/components/TradeCard";
 import { TradePicker } from "@/components/TradePicker";
 import { ProposeDeal } from "@/components/ProposeDeal";
+import { CancelTrade } from "@/components/CancelTrade";
 import { useTrade, useTradeParam } from "@/components/useTrade";
 import { network } from "@/lib/network";
 import { read } from "@/lib/chain";
@@ -53,7 +54,15 @@ function FarmerActions({ trade, onDone }: { trade: Trade; onDone: () => void }) 
     return <p className="text-sm text-ink/70">Connect the farmer's wallet to act on this trade.</p>;
   }
   if (state === "Pending") {
-    return <p className="text-sm text-ink/70">Waiting for the buyer to deposit the payment.</p>;
+    return (
+      <div className="space-y-3">
+        <p className="text-sm text-ink/70">Waiting for the buyer to deposit the payment.</p>
+        <CancelTrade trade={trade} me={address} onDone={onDone} />
+      </div>
+    );
+  }
+  if (state === "Cancelled") {
+    return <p className="text-sm text-ink/70">This trade was cancelled before any deposit.</p>;
   }
   if (state === "Released") {
     const received = config.amount - (advance ? advance.repay + financingFee : 0n);

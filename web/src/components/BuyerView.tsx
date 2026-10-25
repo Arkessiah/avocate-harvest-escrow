@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useWallet } from "@/components/WalletProvider";
 import { useTx } from "@/components/TxProvider";
 import { CreateTrade } from "@/components/CreateTrade";
+import { CancelTrade } from "@/components/CancelTrade";
 import { ProposeDeal } from "@/components/ProposeDeal";
 import { TradeCard } from "@/components/TradeCard";
 import { TradePicker } from "@/components/TradePicker";
@@ -69,6 +70,9 @@ function BuyerActions({ trade, onDone }: { trade: Trade; onDone: () => void }) {
   const { config, state, validation, advance } = trade;
   const total = config.amount + trade.tradeFee;
 
+  if (state === "Cancelled") {
+    return <p className="text-sm text-ink/70">This trade was cancelled before any deposit. Create a new one if needed.</p>;
+  }
   if (state === "Released" || state === "Refunded") {
     return <p className="text-sm text-ink/70">This trade is closed. Nothing else can happen to it.</p>;
   }
@@ -102,6 +106,7 @@ function BuyerActions({ trade, onDone }: { trade: Trade; onDone: () => void }) {
         >
           Deposit {formatUsdc(total)}
         </button>
+        <CancelTrade trade={trade} me={address} onDone={onDone} />
       </div>
     );
   }

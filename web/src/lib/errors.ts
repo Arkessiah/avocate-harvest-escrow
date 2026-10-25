@@ -11,6 +11,7 @@ const CONTRACT_ERRORS: Record<string, string[]> = {
     "NotValidated",
     "AlreadyAdvanced",
     "AdvanceTooLarge",
+    "NotAParty",
   ],
   platform: ["InvalidFee", "PoolNotSet"],
   pool: [

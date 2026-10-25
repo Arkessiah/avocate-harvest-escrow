@@ -285,7 +285,7 @@ function FarmersCard({ farmers, isAdmin, onDone }: { farmers: Farmer[]; isAdmin:
   );
 }
 
-const FILTERS: ("All" | TradeState)[] = ["All", "Pending", "Funded", "Released", "Refunded"];
+const FILTERS: ("All" | TradeState)[] = ["All", "Pending", "Funded", "Released", "Refunded", "Cancelled"];
 
 function Registry({ trades }: { trades: Trade[] }) {
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
