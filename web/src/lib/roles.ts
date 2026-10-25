@@ -2,6 +2,8 @@ export const ROLES = {
   buyer: {
     trades: true,
     label: "Buyer",
+    // Short in the menu; the screen itself names the role as the pitch does.
+    title: "Professional buyer",
     intro:
       "Create a trade with a farmer, lock the price in USDC, and confirm delivery to pay them. If delivery fails validation or the deadline passes, the money comes back to you.",
   },
