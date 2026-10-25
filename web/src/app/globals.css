@@ -17,6 +17,13 @@ body {
   .card {
     @apply rounded-3xl border border-ink/[0.06] bg-surface;
   }
+  .card-highlight {
+    @apply rounded-3xl bg-highlight;
+  }
+  /* Headline figures: condensed face, light weight, large. */
+  .figure-xl {
+    @apply font-condensed text-5xl font-normal leading-none tracking-tight sm:text-6xl;
+  }
   .btn-brand {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-dark px-4 py-2.5
            font-medium text-white transition hover:bg-brand-deep

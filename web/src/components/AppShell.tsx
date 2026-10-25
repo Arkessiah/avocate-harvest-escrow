@@ -13,8 +13,8 @@ export function AppShell({ role, children }: { role?: Role; children: ReactNode 
       <WalletError />
 
       {role && (
-        <section className="mb-6 rounded-3xl bg-brand/5 px-5 py-4">
-          <h1 className="text-base font-semibold text-brand-dark">{ROLES[role].label}</h1>
+        <section className="mb-8 max-w-3xl">
+          <h1 className="text-2xl font-semibold tracking-tight">{ROLES[role].label}</h1>
           <p className="mt-1 text-sm text-ink/70">{ROLES[role].intro}</p>
           {"trades" in ROLES[role] && (
             <p className="mt-2 text-xs text-ink/70">Share this page's link to watch the same trade from another role.</p>

@@ -10,6 +10,7 @@ import { formatUsdc, toInput, toUnits } from "@/lib/usdc";
 import { formatDate } from "@/lib/trade";
 import { readPool, readPosition, type Loan, type PoolState, type Position } from "@/lib/pool";
 import { describeError } from "@/lib/errors";
+import { Ring } from "@/components/Ring";
 
 export function PoolView() {
   const { address } = useWallet();
@@ -26,54 +27,79 @@ export function PoolView() {
   useEffect(refresh, [refresh]);
 
   const lent = pool?.loans.reduce((sum, l) => sum + l.principal, 0n) ?? null;
+  const change = pool ? (pool.sharePrice - 1) * 100 : 0;
+  const base = pool && lent !== null ? pool.held + lent : 0n;
+  const lentPct = base > 0n && lent !== null ? Math.round((Number(lent) / Number(base)) * 100) : 0;
 
   return (
-    <div className="space-y-6">
-      {error && <p className="card p-6 text-sm text-danger">{error}</p>}
+    <div className="grid gap-4 lg:grid-cols-6">
+      {error && <p className="card p-6 text-sm text-danger lg:col-span-6">{error}</p>}
 
-      <section aria-label="Pool overview" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Stat label="Pool value" value={pool ? formatUsdc(pool.totalAssets) : "…"} hint="Cash plus loans and their accrued yield" />
-        <Stat label="Lent to farmers" value={lent !== null ? formatUsdc(lent) : "…"} hint={pool ? `${pool.loans.length} open advances` : ""} />
-        <Stat label="Cash available" value={pool ? formatUsdc(pool.held) : "…"} hint="What depositors can withdraw now" />
-        <Stat
-          label="Share price"
-          value={pool ? `${pool.sharePrice.toFixed(4)} USDC` : "…"}
-          hint={pool ? `Started at 1.0000 · ${((pool.sharePrice - 1) * 100).toFixed(2)}% so far` : ""}
-        />
+      <section aria-label="Pool overview" className="card-highlight flex flex-col gap-6 p-6 sm:flex-row sm:items-center lg:col-span-4">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm font-medium text-ink/70">Pool value</h2>
+          <p className="figure-xl mt-2">
+            {pool ? amountOf(pool.totalAssets) : "…"} <span className="text-2xl text-ink/70">USDC</span>
+          </p>
+          <p className="mt-3 text-sm text-ink/70">Cash plus advances and the yield they have accrued.</p>
+          <p className="mt-4 text-sm">
+            Share price <span className="font-semibold">{pool ? pool.sharePrice.toFixed(4) : "…"}</span>
+            <span className="text-ink/70"> · started at 1.0000 · </span>
+            <span className={change < 0 ? "font-semibold text-danger" : "font-semibold text-brand-dark"}>
+              {pool ? `${change >= 0 ? "+" : ""}${change.toFixed(2)}%` : ""}
+            </span>
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="relative h-32 w-32 shrink-0">
+            <Ring part={lent !== null ? Number(lent) : 0} total={Number(base)} label={`${lentPct}% of the pool is lent to farmers`} />
+            <span className="absolute inset-0 flex items-center justify-center font-condensed text-2xl" aria-hidden>
+              {lentPct}%
+            </span>
+          </div>
+          <dl className="space-y-2 text-sm">
+            <div>
+              <dt className="flex items-center gap-1.5 text-ink/70">
+                <span className="h-2 w-2 rounded-full bg-brand-dark" aria-hidden /> Lent to farmers
+              </dt>
+              <dd className="font-semibold">{lent !== null ? formatUsdc(lent) : "…"}</dd>
+            </div>
+            <div>
+              <dt className="flex items-center gap-1.5 text-ink/70">
+                <span className="h-2 w-2 rounded-full bg-surface ring-1 ring-ink/20" aria-hidden /> Cash available
+              </dt>
+              <dd className="font-semibold">{pool ? formatUsdc(pool.held) : "…"}</dd>
+            </div>
+          </dl>
+        </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-5">
-        <div className="space-y-6 lg:col-span-2">
-          <YourPosition position={position} pool={pool} onDone={refresh} />
-        </div>
-        <section className="card p-6 lg:col-span-3">
-          <h2 className="text-lg font-semibold">Open advances</h2>
-          <p className="mt-1 text-sm text-ink/70">
-            Money the pool has paid to farmers ahead of delivery. Each is repaid with its yield when the trade settles.
-          </p>
-          <Loans loans={pool?.loans ?? null} />
-        </section>
+      <div className="lg:col-span-2">
+        <YourPosition position={position} pool={pool} onDone={refresh} />
       </div>
+
+      <section className="card p-6 lg:col-span-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-lg font-semibold">Open advances</h2>
+          <p className="text-sm text-ink/70">{pool ? `${pool.loans.length} open` : ""}</p>
+        </div>
+        <p className="mt-1 text-sm text-ink/70">
+          Money the pool has paid to farmers ahead of delivery. Each is repaid with its yield when the trade settles.
+        </p>
+        <Loans loans={pool?.loans ?? null} />
+      </section>
     </div>
   );
 }
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <div className="card px-4 py-3">
-      <p className="label">{label}</p>
-      <p className="text-lg font-semibold">{value}</p>
-      {hint && <p className="mt-0.5 text-xs text-ink/70">{hint}</p>}
-    </div>
-  );
-}
+const amountOf = (units: bigint) => formatUsdc(units).replace(" USDC", "");
 
 function YourPosition({ position, pool, onDone }: { position: Position | null; pool: PoolState | null; onDone: () => void }) {
   const { address, connect } = useWallet();
 
   if (!address) {
     return (
-      <section className="card p-6">
+      <section className="card h-full p-6">
         <h2 className="text-lg font-semibold">Your position</h2>
         <p className="mt-1 text-sm text-ink/70">Connect your wallet to deposit USDC and earn the yield farmers pay on advances.</p>
         <button className="btn-brand mt-4 w-full" onClick={connect}>
@@ -88,18 +114,12 @@ function YourPosition({ position, pool, onDone }: { position: Position | null; p
     pool && pool.totalShares > 0n ? Number((position.shares * 10_000n) / pool.totalShares) / 100 : 0;
 
   return (
-    <section className="card p-6">
-      <h2 className="text-lg font-semibold">Your position</h2>
-      <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-xl bg-mist/70 px-3 py-2">
-          <dt className="label">Value</dt>
-          <dd className="text-lg font-semibold">{formatUsdc(position.value)}</dd>
-        </div>
-        <div className="rounded-xl bg-mist/70 px-3 py-2">
-          <dt className="label">Share of the pool</dt>
-          <dd className="text-lg font-semibold">{ownership.toFixed(2)}%</dd>
-        </div>
-      </dl>
+    <section className="card h-full p-6">
+      <h2 className="text-sm font-medium text-ink/70">Your position</h2>
+      <p className="figure-xl mt-2 sm:text-5xl">
+        {amountOf(position.value)} <span className="text-xl text-ink/70">USDC</span>
+      </p>
+      <p className="mt-2 text-sm text-ink/70">{ownership.toFixed(2)}% of the pool</p>
       <Amount
         title="Deposit"
         help={position.wallet !== null ? `Wallet balance: ${formatUsdc(position.wallet)}` : "Your wallet holds no USDC yet."}

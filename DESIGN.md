@@ -18,6 +18,7 @@ typography, and every on-chain step shown to the user as it happens.
 | `ink` | `#0B1F17` | Body text |
 | `mist` | `#E8F5EF` | Page background; tiles inside a card |
 | `surface` | `#F8FCFA` | Cards, dialogs, inputs: a white tinted toward the brand, never pure white |
+| `highlight` | `#D4F1E4` | The one highlighted card per screen (`.card-highlight`): the figure or action to watch |
 | `pending` / `pending-tint` | `#92400E` / `#FEF3C7` | Pending state |
 | `released` / `released-tint` | `#065F46` / `#D1FAE5` | Released state |
 | `danger` (+ `strong`, `tint`, `soft`, `line`) | `#BE123C` … | Errors, refunded state, destructive actions |
@@ -82,20 +83,23 @@ body. Hierarchy comes from weight and colour, not italics.
 | `.btn-brand` | primary action, `bg-brand-dark hover:bg-brand-deep rounded-xl px-4 py-2.5 font-medium text-white`, disabled at 50% opacity |
 | `.btn-ghost` | secondary action, `rounded-xl border border-brand/30 bg-white/60 text-brand-dark` |
 | `.input` | `rounded-xl border border-ink/10 bg-white/80 px-3 py-2 text-sm`, focus ring `brand/20` |
-| Stat tile | `rounded-xl bg-white/60 px-4 py-3`, label on top, value `text-lg font-semibold` |
+| `.figure-xl` | Headline figures: Barlow Condensed, 48–60 px, light; the unit (USDC) beside it, smaller and muted |
+| `Ring` | Two-part progress ring in SVG (`brand-dark` arc on `surface` track) with its share in the centre and a legend beside it |
 
 Radii: `rounded-xl` for controls and tiles, `rounded-2xl` for cards and dialogs, `rounded-full`
 for state badges only.
 
 ## Layout and patterns
 
+- **Bento screens** (pool, admin, overview): a 6-column grid of solid cards with one
+  `.card-highlight` piece carrying the headline figure; secondary cards hold actions and lists.
 - Page container `mx-auto max-w-5xl px-4 py-10`; single column on mobile, `lg:grid-cols-5`
   (2 + 3) where a form sits next to the trade it creates.
 - **Header**: the app title as text on the left (the Avocate logo is used only on the landing
   page, never inside the app); language switcher and wallet button on the right; role
   navigation underneath as pills (active pill `bg-brand-dark text-white`).
-- **Role intro**: every role page opens with a `bg-brand/5 border-brand/20` panel naming the
-  role, what it can do, and a hint that the URL can be shared to watch the same trade.
+- **Role intro**: every role page opens with the role's name as the page title and one
+  sentence on what it can do, as plain text (no box, so it never competes with the highlight).
 - **Transaction dialog**: every on-chain action opens a modal listing each step as it
   happens (build, simulate, sign, submit, confirmed), with a link to the explorer at the
   end. Nothing on-chain happens silently.

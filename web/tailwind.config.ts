@@ -11,6 +11,8 @@ const config: Config = {
         mist: "#E8F5EF",
         // Tinted white for surfaces: pure white reads flat against the mint background.
         surface: "#F8FCFA",
+        // The one highlighted card per screen: the figure or action the reader should watch.
+        highlight: "#D4F1E4",
         // State and feedback colours, one name per role (values kept from the earlier
         // Tailwind palette so contrast stays as measured in DESIGN.md).
         pending: { DEFAULT: "#92400E", tint: "#FEF3C7" },
