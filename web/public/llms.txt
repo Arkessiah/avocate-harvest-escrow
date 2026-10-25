@@ -2,7 +2,7 @@
 
 > USDC escrow on the Stellar network for agricultural trade between a buyer and a farmer. The buyer locks the price in a per-trade smart contract, an independent validator checks the delivery, and the farmer is paid in seconds once it is confirmed. A financing pool funded by several depositors can advance up to 80% of the price to onboarded farmers. Beta on Stellar testnet with test USDC: no real money.
 
-Built by Avocate (https://avocate.io) during HackMeridian 2026 in Lisbon. Version 0.0.3.
+Built by Avocate (https://avocate.io) during HackMeridian 2026 in Lisbon. Version 0.0.4.
 
 ## Pages
 

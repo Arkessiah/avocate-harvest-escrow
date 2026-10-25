@@ -2,7 +2,7 @@
 
 [![contracts](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml) [![web](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/web.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/web.yml)
 
-**Version 0.0.3** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
+**Version 0.0.4** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
 
 **Live app:** https://avocate-harvest-escrow.vercel.app
 
@@ -106,7 +106,7 @@ that is built.
 | Trade escrow (fund, confirm, refund, validation, agent release) | Built, tested, deployed on testnet |
 | Platform (fees, escrow factory, registry, upgrade) | Built, tested, deployed on testnet |
 | Financing pool: deposits and withdrawals (SEP-56) | Built and tested |
-| Financing pool: advances to farmers, repayment, losses | Built and tested |
+| Financing pool: advances to farmers, repayment, losses | Built and tested; pool v2 deployed on testnet after the audit (upgradeable) |
 | Pool and financing on testnet | Deployed; two financed trades run end to end ([report](deploy/deployments/testnet-smoke.md)) |
 | Web app | Live at https://avocate-harvest-escrow.vercel.app: screens for buyer, farmer (co-signed advances), pool depositor, validator, agent and Avocate admin, plus a landing page with SEO and AI-crawler metadata. Languages in progress |
 | Agent with x402 payments | Live: buys the validator's delivery check over x402 before each release |
@@ -121,6 +121,12 @@ Requirements: Rust with the `wasm32v1-none` target, the [Stellar CLI](https://de
 ```bash
 scripts/deploy.sh testnet   # build, upload, deploy platform + pool, link them
 scripts/smoke.sh testnet    # two financed trades with real USDC, links in a report
+
+# Changes to a live deployment (each records the new code hash in the deployment file)
+scripts/upgrade-platform.sh testnet   # replace the platform's code in place
+scripts/set-escrow-code.sh testnet    # escrow code for trades created from now on
+scripts/deploy-pool.sh testnet        # a new pool linked to the platform (previous one kept)
+scripts/setup-x402.sh testnet         # USDC trustlines and balance for the agent's x402 payments
 ```
 
 Nothing network-specific is hardcoded: RPC, passphrase, USDC and default fees live in
@@ -143,6 +149,7 @@ Current testnet deployment: [addresses](deploy/deployments/testnet.json) ·
 
 ## Version history
 
+- **0.0.4**: security audit (CoinFabrik Scout + manual review) and its fixes: no refund once a delivery conforms, the advance written off at the moment of a rejection, yield charged in proportion to time, deposits paused while an advance is overdue, deadline refunds open to anyone. New **pool v2** (upgradeable) linked to the platform; the previous pool's advance was settled and its balance migrated. Buyers can also pay in XLM through Soroswap.
 - **0.0.3**: autonomous agent that pays for the validator's delivery check over x402 (0.01 USDC per check, settled on Stellar) and releases a trade only when the check matches the chain.
 - **0.0.2**: trades agreed on the spot, signed by buyer and farmer from a link or a QR code (`create_trade`, platform upgraded in place); either party can cancel a trade before it is funded (new escrow code for new trades).
 - **0.0.1**: escrow, platform and financing pool on testnet; web app with buyer, farmer, pool, validator, agent and admin screens.
