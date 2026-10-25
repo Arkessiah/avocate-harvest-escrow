@@ -4,7 +4,7 @@
 
 [![contracts](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml) [![web](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/web.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/web.yml)
 
-**Version 0.0.4** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
+**Version 0.0.5** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
 
 **Live app:** https://avocate-harvest-escrow.vercel.app
 
@@ -122,10 +122,13 @@ The fixes made after the audit (no refund after a conforming delivery, the loss 
 | Financing pool: deposits and withdrawals (SEP-56) | Built and tested |
 | Financing pool: advances to farmers, repayment, losses | Built and tested; pool v2 deployed on testnet after the audit (upgradeable) |
 | Security audit | Done (Scout + manual review), fixes deployed in v0.0.4: [report](audits/2026-10-25-security-audit.pdf) |
-| Pool and financing on testnet | Deployed; two financed trades run end to end ([report](deploy/deployments/testnet-smoke.md)) |
-| Web app | Live at https://avocate-harvest-escrow.vercel.app: screens for buyer, farmer (co-signed advances), pool depositor, validator, agent and Avocate admin, plus a landing page with SEO and AI-crawler metadata. Languages in progress |
+| Pool and financing on testnet | Deployed; advances repaid, written off and open on testnet ([first end-to-end report](deploy/deployments/testnet-smoke.md)) |
+| Web app | Live at https://avocate-harvest-escrow.vercel.app: screens for buyer, farmer (co-signed advances), pool depositor, validator, agent and Avocate admin, plus a landing page in English, Spanish and Portuguese. The app screens are in English for now |
 | Agent with x402 payments | Live: buys the validator's delivery check over x402 before each release |
 | Pay in XLM (Soroswap) | Live on testnet: the buyer can fund a trade with XLM, swapped to USDC by Soroswap's router |
+| Trades agreed in person | Live: link or QR code, with an in-app scanner and sharing by message, email or QR |
+| Sample data | `scripts/seed.mjs` creates trades in every state, advances repaid and written off, and pool movements |
+| Dependencies | Alerts reviewed; Next.js upgrade planned after the hackathon ([review](audits/2026-10-25-dependency-alerts.md), issue #2) |
 
 Contracts and build instructions: [`contract/`](contract/README.md).
 
@@ -164,6 +167,7 @@ Current testnet deployment: [addresses](deploy/deployments/testnet.json) ·
 
 ## Version history
 
+- **0.0.5**: trades agreed in person with an in-app QR scanner, and proposal, advance and trade links shared by WhatsApp, Telegram, email or QR code. A history of the actions taken in the browser. Fees aligned with the business model: a 1% harvest fee paid by the buyer (the farmer receives 100% of the price) and a 0.5% financing fee. Landing page in English, Spanish and Portuguese, a screen picker and layouts for phones, and a notice when a newer version is deployed. `scripts/seed.mjs` fills testnet with trades in every state. [THESIS.md](THESIS.md), [SPEC.md](SPEC.md), [HOW-WE-BUILD.md](HOW-WE-BUILD.md), and a [review of the dependency alerts](audits/2026-10-25-dependency-alerts.md) with its upgrade plan.
 - **0.0.4**: security audit (CoinFabrik Scout + manual review) and its fixes: no refund once a delivery conforms, the advance written off at the moment of a rejection, yield charged in proportion to time, deposits paused while an advance is overdue, deadline refunds open to anyone. New **pool v2** (upgradeable) linked to the platform; the previous pool's advance was settled and its balance migrated. Buyers can also pay in XLM through Soroswap.
 - **0.0.3**: autonomous agent that pays for the validator's delivery check over x402 (0.01 USDC per check, settled on Stellar) and releases a trade only when the check matches the chain.
 - **0.0.2**: trades agreed on the spot, signed by buyer and farmer from a link or a QR code (`create_trade`, platform upgraded in place); either party can cancel a trade before it is funded (new escrow code for new trades).

@@ -25,7 +25,7 @@ export function Landing({ lang }: { lang: Lang }) {
         description: SITE_DESCRIPTION,
         applicationCategory: "FinanceApplication",
         operatingSystem: "Web",
-        softwareVersion: "0.0.4",
+        softwareVersion: "0.0.5",
         isAccessibleForFree: true,
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         publisher: { "@id": `${SITE_URL}/#org` },
@@ -211,7 +211,7 @@ export function Landing({ lang }: { lang: Lang }) {
       <footer className="border-t border-ink/10">
         <div className="mx-auto max-w-6xl space-y-2 px-4 py-8 text-xs text-ink/70">
           <p>
-            Avocate Harvest Escrow v0.0.4 {t.footerBy}{" "}
+            Avocate Harvest Escrow v0.0.5 {t.footerBy}{" "}
             <a href="https://avocate.io" className="text-brand-dark hover:underline">
               Avocate
             </a>{" "}
