@@ -22,6 +22,14 @@ fmt() { python3 -c "import sys; print(f'{int(sys.argv[1])/1e7:.4f}')" "$1"; }
 log() { echo "$1"; echo "$1" >>"$REPORT"; }
 step() { log "| $1 | ${2:-} |"; }
 
+# Runs a step and stops the whole run if it fails: a report must never show a trade that
+# skipped a step as if it had succeeded.
+run() {
+  local label="$1" out; shift
+  out="$("$@")" || { echo "step failed: $label" >&2; exit 1; }
+  step "$label" "$out"
+}
+
 # USDC on testnet comes from the DEX (XLM -> USDC path payment), no faucet needed.
 fund_usdc() {
   local who="$1" need="$2"
@@ -67,25 +75,25 @@ fund_usdc buyer $((25 * UNIT))
   echo "|---|---|"
 } >"$REPORT"
 
-step "Admin onboards the farmer (limit 50 USDC)" "$(invoke admin "$POOL" onboard --farmer "$(addr farmer)" --limit $((50 * UNIT)))"
-step "Depositor puts 20 USDC in the pool" "$(invoke depositor "$POOL" deposit --assets $((20 * UNIT)) \
-  --receiver "$(addr depositor)" --from "$(addr depositor)" --operator "$(addr depositor)")"
+run "Admin onboards the farmer (limit 50 USDC)" invoke admin "$POOL" onboard --farmer "$(addr farmer)" --limit $((50 * UNIT))
+run "Depositor puts 20 USDC in the pool" invoke depositor "$POOL" deposit --assets $((20 * UNIT)) \
+  --receiver "$(addr depositor)" --from "$(addr depositor)" --operator "$(addr depositor)"
 POOL_START="$(read_call "$POOL" total_assets | tr -d '"')"
 
 A="$(open_trade)"
 step "**A** buyer opens trade \`$A\`" ""
-step "A: buyer funds 10 + 0.1%" "$(invoke buyer "$A" fund)"
-step "A: farmer requests 8 USDC, buyer co-signs" "$(advance "$A")"
-step "A: validator attests a conforming delivery" "$(invoke validator "$A" validate --ok true --report_hash "$(report_hash)")"
-step "A: agent settles" "$(invoke agent "$A" agent_release)"
+run "A: buyer funds 10 + 0.1%" invoke buyer "$A" fund
+run "A: farmer requests 8 USDC, buyer co-signs" advance "$A"
+run "A: validator attests a conforming delivery" invoke validator "$A" validate --ok true --report_hash "$(report_hash)"
+run "A: agent settles" invoke agent "$A" agent_release
 POOL_AFTER_A="$(read_call "$POOL" total_assets | tr -d '"')"
 
 B="$(open_trade)"
 step "**B** buyer opens trade \`$B\`" ""
-step "B: buyer funds 10 + 0.1%" "$(invoke buyer "$B" fund)"
-step "B: farmer requests 8 USDC, buyer co-signs" "$(advance "$B")"
-step "B: validator rejects the delivery" "$(invoke validator "$B" validate --ok false --report_hash "$(report_hash)")"
-step "B: buyer is refunded in full" "$(invoke buyer "$B" refund)"
+run "B: buyer funds 10 + 0.1%" invoke buyer "$B" fund
+run "B: farmer requests 8 USDC, buyer co-signs" advance "$B"
+run "B: validator rejects the delivery" invoke validator "$B" validate --ok false --report_hash "$(report_hash)"
+run "B: buyer is refunded in full" invoke buyer "$B" refund
 POOL_AFTER_B="$(read_call "$POOL" total_assets | tr -d '"')"
 
 {
