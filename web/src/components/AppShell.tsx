@@ -16,9 +16,9 @@ export function AppShell({ role, children }: { role?: Role; children: ReactNode 
         <section className="mb-6 rounded-2xl border border-brand/20 bg-brand/5 px-5 py-4">
           <h1 className="text-xs font-semibold uppercase tracking-wide text-brand-dark">{ROLES[role].label}</h1>
           <p className="mt-1 text-sm text-ink/70">{ROLES[role].intro}</p>
-          <p className="mt-2 text-xs text-ink/70">
-            Share this page's link to watch the same trade from another role.
-          </p>
+          {"trades" in ROLES[role] && (
+            <p className="mt-2 text-xs text-ink/70">Share this page's link to watch the same trade from another role.</p>
+          )}
         </section>
       )}
 
