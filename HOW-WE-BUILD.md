@@ -9,9 +9,7 @@ describes that system. It does not include prompts.
 | Tool | What it is used for |
 |---|---|
 | **Claude Code** | AI coding agent that executes the work, under the rules below |
-| **Obsidian** | The knowledge vault: long-term memory across projects and machines |
-| **knsync** (own) | Syncs each project's private context between machines through the vault |
-| **linearpm** (own) | Connects repositories to the Linear backlog, limited to product work |
+| **Obsidian** | The knowledge vault: long-term memory across projects |
 | **Raven MCP + Stellar skills** | Current Stellar documentation, ecosystem data and build playbooks |
 | **Playwright** | Screenshots and end-to-end checks in a real browser |
 | **CoinFabrik Scout** | Static analysis of the Soroban contracts |
@@ -24,13 +22,6 @@ describes that system. It does not include prompts.
   runbook. That context stays private and out of the repository.
 - An authorship log records, for important work, what the author contributed and what was executed by
   tools.
-
-## Own tools that keep it in sync
-- knsync, a sync tool of our own, moves each project's private context between the author's machines
-  through the vault, so work resumes with the same context on any computer.
-- The library of agents and skills is synced automatically whenever one is added or changed.
-- linearpm, also our own, connects repositories to the product backlog in Linear, keeping it limited to
-  product work.
 
 ## Rules for the agents
 A written rulebook applies to every project and every session. Some of what it enforces:
@@ -46,13 +37,22 @@ A written rulebook applies to every project and every session. Some of what it e
   widths, and no generic "made by AI" look in design, copy or code.
 - **Security before production**: an exposure checklist for every deployment and hardened public forms.
 
-## Agents and skills
-- Claude Code as the coding agent, with a library of specialised agents (smart contracts, security review,
-  frontend, documentation, research, testing) and skills for recurring work.
-- For Stellar: the Raven MCP server for up-to-date documentation and ecosystem data, and the Stellar
-  skills for contracts, wallets, assets and agentic payments.
-- For design: a design-system skill against generic layouts, and an isometric-figure skill for the animated
-  illustration on the landing page.
+## Agents and skills used in this project
+Claude Code is the main agent. For work that benefits from a separate, focused pass it delegates to
+specialised agents:
+
+| Agent | What it did here |
+|---|---|
+| **Smart-contract auditor** | Manual security review of the three contracts, alongside Scout; its findings are in the [security review](audits/) |
+| **Research agents** | Studies of the HackMeridian partner integrations and of the fiat on/off-ramp options in test mode |
+| **Writing agents** | The problem and solution summary, and keeping the pitch script in line with what was built |
+| **Parallel build agents** | The animated isometric figure on the landing page, built and reworked around agriculture |
+
+Skills used:
+- **Stellar**: the Raven MCP server for up-to-date documentation and ecosystem data, and the Stellar skills
+  for contracts, wallets, assets and agentic payments (x402).
+- **Design**: Hallmark, a design-system skill against generic layouts, and Anatomy, for the isometric
+  figure.
 
 ## Checks in this project
 - Contract tests with soroban-sdk and web tests with Node's test runner, in GitHub Actions.
