@@ -50,6 +50,8 @@ export function describeError(e: unknown, kind?: ContractKind): string {
   if (/Account not found|does not exist/i.test(raw)) {
     return "This account is not funded on the network yet. Fund it with XLM first.";
   }
-  if (/Error\(Auth, /.test(raw))return "This wallet is not allowed to make this call.";
+  if (/txBadSeq/.test(raw)) return "The account sent another transaction in the meantime. Start this action again.";
+  if (/txTooLate/.test(raw)) return "This transaction expired before it was submitted. Start it again.";
+  if (/Error\(Auth, /.test(raw)) return "This wallet is not allowed to make this call.";
   return raw.split("\n")[0].slice(0, 200);
 }

@@ -27,6 +27,8 @@ export const network = {
   explorerTx: selected.config.explorer_tx,
   explorerContract: selected.config.explorer_tx.replace(/\/tx\/$/, "/contract/"),
   usdc: selected.config.usdc,
+  // Deploy-time value of the pool's advance cap; the contract stays the authority.
+  maxAdvanceBps: selected.config.max_advance_bps,
   contracts: selected.deployment.contracts,
   accounts: selected.deployment.accounts,
   deployedAt: selected.deployment.deployed_at,

@@ -6,11 +6,13 @@ import { TxDialog, type TxState } from "@/components/TxDialog";
 import { describeError, type ContractKind } from "@/lib/errors";
 import { invoke, type Invocation } from "@/lib/tx";
 
-export interface TxRequest extends Invocation {
-  title: string;
-  detail: string;
-  kind: ContractKind;
-}
+type Executor = (source: string, onStep: (step: string) => void) => Promise<{ hash: string; result: unknown }>;
+
+// Either a plain contract call, or a custom sequence of steps (such as a co-signed advance).
+export type TxRequest = { title: string; detail: string; kind: ContractKind } & (
+  | (Invocation & { execute?: undefined })
+  | { execute: Executor }
+);
 
 type Run = (request: TxRequest) => Promise<{ hash: string; result: unknown } | null>;
 
@@ -23,14 +25,15 @@ export function TxProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<TxState | null>(null);
 
   const run = useCallback<Run>(
-    async ({ title, detail, kind, ...call }) => {
+    async (request) => {
+      const { title, detail, kind } = request;
       const source = address ?? (await connect());
       if (!source) return null;
 
       setState({ title, detail, steps: [], status: "running" });
       const onStep = (step: string) => setState((s) => s && { ...s, steps: [...s.steps, step] });
       try {
-        const out = await invoke(call, source, onStep);
+        const out = request.execute ? await request.execute(source, onStep) : await invoke(request, source, onStep);
         setState((s) => s && { ...s, status: "ok", hash: out.hash });
         return out;
       } catch (e) {

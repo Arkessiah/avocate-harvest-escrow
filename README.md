@@ -79,6 +79,13 @@ that is built.
 - The validator route is a **demo convenience**, disabled unless `DEMO_VALIDATOR=true`. A real validator is an independent inspector signing with their own wallet; a public route signing as the validator would let anyone decide deliveries.
 - The inspection report stays off-chain; only its SHA-256 hash is recorded, so anyone holding the report can verify it.
 
+**Web app**
+- Every signature happens in the user's own wallet; the app never sees a secret key. Before asking for one, it checks that the wallet is on the same network as the app.
+- A trade is only shown, and money only sent to it, if the platform registry confirms it was created by Avocate. A contract that imitates the escrow is refused.
+- Advance requests travel from the farmer to the buyer as a link. The request sits in the URL fragment, which browsers never send to any server.
+- The buyer's screen does not trust the link: it decodes the transaction they are about to sign and checks that it is a single call to the Avocate pool's `advance`, prepared for their account. The amounts shown come from that transaction.
+- The farmer's signature on a request expires after one hour.
+
 ## Status
 
 | Piece | State |
@@ -88,7 +95,7 @@ that is built.
 | Financing pool: deposits and withdrawals (SEP-56) | Built and tested |
 | Financing pool: advances to farmers, repayment, losses | Built and tested |
 | Pool and financing on testnet | Deployed; two financed trades run end to end ([report](deploy/deployments/testnet-smoke.md)) |
-| Web app | In progress: live at https://avocate-harvest-escrow.vercel.app, reading the testnet deployment |
+| Web app | In progress, live at https://avocate-harvest-escrow.vercel.app: buyer and farmer screens, co-signed advances |
 
 Contracts and build instructions: [`contract/`](contract/README.md).
 

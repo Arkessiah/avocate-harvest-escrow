@@ -68,6 +68,7 @@ export function TxDialog({ state, onClose }: { state: TxState | null; onClose: (
         </ol>
 
         <div className="shrink-0 border-t border-ink/5 px-5 py-4">
+          {state.status === "ok" && !state.hash && <p className="mb-3 text-sm font-medium text-brand-dark">Done.</p>}
           {state.status === "ok" && state.hash && (
             <div className="mb-3 space-y-1">
               <p className="text-sm font-medium text-brand-dark">Done.</p>

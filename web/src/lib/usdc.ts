@@ -18,4 +18,10 @@ export function formatUsdc(units: bigint): string {
   return `${negative ? "−" : ""}${whole}.${String(cents % 100n).padStart(2, "0")} USDC`;
 }
 
+// Exact amount in the form an input field accepts, without rounding.
+export function toInput(units: bigint): string {
+  const frac = String(units % UNIT).padStart(DECIMALS, "0").replace(/0+$/, "");
+  return frac ? `${units / UNIT}.${frac}` : String(units / UNIT);
+}
+
 export const bps = (amount: bigint, rateBps: number) => (amount * BigInt(rateBps)) / 10_000n;

@@ -5,7 +5,8 @@ import { useWallet } from "@/components/WalletProvider";
 import { useTx } from "@/components/TxProvider";
 import { CreateTrade } from "@/components/CreateTrade";
 import { TradeCard } from "@/components/TradeCard";
-import { TradeLoader } from "@/components/TradeLoader";
+import { TradePicker } from "@/components/TradePicker";
+import { AdvanceApproval, useAdvanceCode } from "@/components/AdvanceApproval";
 import { useTrade, useTradeParam } from "@/components/useTrade";
 import { network } from "@/lib/network";
 import { read } from "@/lib/chain";
@@ -15,28 +16,47 @@ import { formatDate, type Trade } from "@/lib/trade";
 export function BuyerView() {
   const [tradeId, setTradeId] = useTradeParam();
   const { trade, error, loading, refresh } = useTrade(tradeId);
+  const [advanceCode, clearAdvance] = useAdvanceCode();
+  const [version, setVersion] = useState(0);
+  const changed = () => {
+    refresh();
+    setVersion((v) => v + 1);
+  };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-5">
-      <div className="lg:col-span-2">
-        <CreateTrade onCreated={setTradeId} />
+    <>
+      {advanceCode && (
+        <AdvanceApproval
+          code={advanceCode}
+          trade={trade}
+          onDismiss={clearAdvance}
+          onDone={() => {
+            clearAdvance();
+            changed();
+          }}
+        />
+      )}
+      <div className="grid gap-6 lg:grid-cols-5">
+        <div className="lg:col-span-2">
+          <CreateTrade
+            onCreated={(id) => {
+              setTradeId(id);
+              setVersion((v) => v + 1);
+            }}
+          />
+        </div>
+        <div className="lg:col-span-3">
+          <TradePicker current={tradeId} onSelect={setTradeId} party="buyer" version={version} />
+          {error && <p className="card-glass p-6 text-sm text-rose-700">{error}</p>}
+          {loading && !trade && <p className="card-glass p-6 text-sm text-ink/70">Reading the trade from the network…</p>}
+          {trade && (
+            <TradeCard trade={trade}>
+              <BuyerActions trade={trade} onDone={changed} />
+            </TradeCard>
+          )}
+        </div>
       </div>
-      <div className="lg:col-span-3">
-        <TradeLoader current={tradeId} onLoad={setTradeId} />
-        {error && <p className="card-glass p-6 text-sm text-rose-700">{error}</p>}
-        {!tradeId && !error && (
-          <p className="card-glass p-6 text-sm text-ink/70">
-            Create a trade, or open one you already have by pasting its address.
-          </p>
-        )}
-        {loading && !trade && <p className="card-glass p-6 text-sm text-ink/70">Reading the trade from the network…</p>}
-        {trade && (
-          <TradeCard trade={trade}>
-            <BuyerActions trade={trade} onDone={refresh} />
-          </TradeCard>
-        )}
-      </div>
-    </div>
+    </>
   );
 }
 

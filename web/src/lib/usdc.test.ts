@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { bps, formatUsdc, toUnits } from "./usdc.ts";
+import { bps, formatUsdc, toInput, toUnits } from "./usdc.ts";
 
 test("toUnits parses whole and decimal amounts into 7-decimal base units", () => {
   assert.equal(toUnits("1000"), 10_000_000_000n);
@@ -24,4 +24,10 @@ test("formatUsdc shows two decimals, rounding half up for display only", () => {
 test("bps rounds down like the contract", () => {
   assert.equal(bps(10_000_000_000n, 10), 10_000_000n);
   assert.equal(bps(999n, 10), 0n);
+});
+
+test("toInput writes the exact amount back, and round-trips through toUnits", () => {
+  assert.equal(toInput(80_000_000n), "8");
+  assert.equal(toInput(12_345_678n), "1.2345678");
+  for (const u of [0n, 1n, 79_999_999n, 10_000_000_000n]) assert.equal(toUnits(toInput(u)), u);
 });
