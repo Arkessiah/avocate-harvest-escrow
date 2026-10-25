@@ -46,10 +46,11 @@ that is built.
 
 **Trade escrow**
 - Trade terms (parties, token, price, fees, agent, validator, pool, deadline) are fixed at creation; nobody can redirect the payout or change the amount.
-- Only the buyer can fund, confirm or claim a refund.
+- Only the buyer can fund, confirm, or claim a refund after a rejected delivery. A refund after the deadline can be triggered by anyone, because the money still goes only to the pool and the buyer: an expired trade cannot hold the pool's money hostage.
 - The validator attests a delivery **once**. A verdict that could be rewritten would let a negative attestation be swapped in later to unlock a refund.
 - The agent can only trigger the payout already agreed, and only after a conforming validation. It cannot choose recipients or amounts.
 - A refund before the deadline needs a non-conforming validation from the independent validator.
+- Once the validator has confirmed the delivery, there is no refund at all, not even after the deadline: the goods were delivered, so the trade can only be paid out to the farmer. (Fixed after the audit, finding F-05.)
 - State changes before any token moves, so a trade can never be settled twice.
 - Before any money is deposited, the buyer or the farmer can cancel the trade (state `Cancelled`). Once funded it can only end through settlement or a refund, so no one can walk away with the other party's money. Trades created before this rule (escrow code earlier than v0.0.2) cannot be cancelled; the pool refuses to finance a cancelled trade.
 
@@ -65,17 +66,19 @@ that is built.
 - Rounding always favours the pool, so repeated small operations cannot drain the other depositors.
 - Shares are not transferable and there are no allowances: only the owner can deposit their funds or redeem their shares.
 - Only idle cash can be withdrawn; money lent to farmers stays in the pool until it is repaid.
+- While any advance is past its deadline and unpaid, deposits are paused: new money would otherwise buy shares priced without that advance and profit if it is repaid later. (Pool v2, audit finding F-01.)
+- The pool can be upgraded in place by the admin, so a fix never again requires a new pool. (Pool v2.)
 
 **Financing (advances to farmers)**
 - Only genuine Avocate trades can be financed: the pool checks the platform registry, that the escrow names this pool, that it is funded and still within its deadline.
 - Only farmers onboarded by the admin get advances, up to **80% of the price** and up to a per-farmer exposure cap. One advance per trade, and none once a verdict exists.
 - Both the farmer and the buyer sign the advance. By signing, the buyer accepts that a deadline refund repays the pool first.
-- The amount owed (advance + 2%) is computed by the escrow from the terms it snapshotted at creation, never taken from the caller.
+- The amount owed is computed by the escrow from the terms it snapshotted at creation, never taken from the caller: the advance plus the 2% yield **in proportion to the time the farmer had the money**. Repaying early costs less; at the deadline it is the full 2%. The escrow uses the same linear rate the pool uses to value the loan, so a repayment never makes the share price jump. (Audit finding F-04.)
 - **Deadline refund on a financed trade:** the pool is repaid first and the buyer gets the rest. A buyer and a farmer who agree to let the trade lapse end up exactly where they started minus the yield: colluding gains nothing.
-- **Rejected delivery (independent validator):** the buyer gets the whole deposit back and the advance is written off. The loss is shared by all depositors in proportion to their shares.
+- **Rejected delivery (independent validator):** the buyer gets the whole deposit back and the advance is written off **at the moment of the rejection**, so no depositor can leave in between at a price that still counts it. The loss is shared by all depositors in proportion to their shares. (Audit finding F-02.)
 - Yield accrues linearly over the loan term, so nobody can deposit just before a repayment, take the yield and leave.
 - A loan past its deadline counts as zero in the pool value until it is repaid, so a depositor who sees a loss coming cannot exit at a price that still includes it.
-- The pool only accepts repayment and loss notices from escrows it actually lent to.
+- The pool only accepts repayment and loss notices from escrows it actually lent to, and a repayment outside the range the loan can owe (principal to principal + full yield) is rejected.
 
 **Service routes (web app)**
 - The agent and the demo validator sign on the server; their keys live in environment variables and never reach the browser.

@@ -1,7 +1,7 @@
 #![no_std]
 use soroban_sdk::{
     contract, contractclient, contracterror, contractevent, contractimpl, contracttype,
-    panic_with_error, token, Address, Env, Vec,
+    panic_with_error, token, Address, BytesN, ContractExecutable, Env, Vec,
 };
 
 const DAY_IN_LEDGERS: u32 = 17_280;
@@ -46,6 +46,11 @@ pub enum Error {
     UnknownLoan = 13,
     Expired = 14,
     InvalidFee = 15,
+    /// An advance is past its deadline and unpaid: new money would buy shares priced
+    /// without it and profit if it is repaid later, so deposits wait until it is settled.
+    DepositsPaused = 16,
+    /// An escrow reported a repayment outside what the loan can owe.
+    InvalidRepayment = 17,
 }
 
 #[contracttype]
@@ -101,6 +106,7 @@ pub enum EscrowState {
     Funded,
     Released,
     Refunded,
+    Cancelled,
 }
 
 #[contractclient(name = "EscrowClient")]
@@ -262,6 +268,7 @@ impl Pool {
     }
 
     pub fn deposit(env: Env, assets: i128, receiver: Address, from: Address, operator: Address) -> i128 {
+        require_no_overdue(&env);
         require_owner(&env, &operator, &from);
         positive(&env, assets);
         let shares = to_shares(&env, assets, Rounding::Down);
@@ -273,6 +280,7 @@ impl Pool {
     }
 
     pub fn mint(env: Env, shares: i128, receiver: Address, from: Address, operator: Address) -> i128 {
+        require_no_overdue(&env);
         require_owner(&env, &operator, &from);
         positive(&env, shares);
         let assets = to_assets(&env, shares, Rounding::Up);
@@ -401,15 +409,21 @@ impl Pool {
     }
 
     /// Called by an escrow right after it transferred what it owes to the pool.
-    pub fn on_repaid(env: Env, escrow: Address) {
+    pub fn on_repaid(env: Env, escrow: Address, amount: i128) {
         escrow.require_auth();
         let loan = take_loan(&env, &escrow);
-        set_cash(&env, cash(&env) + loan.repay);
-        Repaid { escrow, amount: loan.repay }.publish(&env);
+        // The escrow pays the principal plus the yield accrued so far (all of it at the
+        // deadline); anything outside that range means the escrow is not one we lent to
+        // under these terms.
+        if amount < loan.principal || amount > loan.repay {
+            panic_with_error!(&env, Error::InvalidRepayment);
+        }
+        set_cash(&env, cash(&env) + amount);
+        Repaid { escrow, amount }.publish(&env);
         bump(&env);
     }
 
-    /// Called by an escrow refunded after a rejected delivery: the advance is lost and the
+    /// Called by an escrow as soon as its delivery is rejected: the advance is lost and the
     /// loss is shared by every depositor through the share price.
     pub fn on_written_off(env: Env, escrow: Address) {
         escrow.require_auth();
@@ -428,6 +442,12 @@ impl Pool {
 
     pub fn farmer_limit(env: Env, farmer: Address) -> Option<i128> {
         env.storage().persistent().get(&DataKey::FarmerLimit(farmer))
+    }
+
+    /// Replaces this contract's code in place; shares, cash and loans survive.
+    pub fn upgrade(env: Env, new_wasm: BytesN<32>) {
+        require_admin(&env);
+        env.deployer().update_current_contract(ContractExecutable::Wasm(new_wasm));
     }
 
     pub fn admin(env: Env) -> Address {
@@ -471,6 +491,13 @@ fn set_exposure(env: &Env, farmer: &Address, value: i128) {
 
 fn query_asset(env: &Env) -> Address {
     env.storage().instance().get(&DataKey::Asset).unwrap()
+}
+
+fn require_no_overdue(env: &Env) {
+    let now = env.ledger().timestamp();
+    if loans(env).iter().any(|l| now > l.deadline) {
+        panic_with_error!(env, Error::DepositsPaused);
+    }
 }
 
 fn require_admin(env: &Env) {

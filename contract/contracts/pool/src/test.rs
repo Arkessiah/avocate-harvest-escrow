@@ -299,9 +299,11 @@ mod lending {
         let t = m.funded_trade();
         m.pool().advance(&t.escrow, &(800 * USDC));
         m.validate(&t, true);
+        m.at(START + TERM);
         m.trade(&t).agent_release();
 
-        // Pool gets 800 + 2%, platform 0.2% of the advance + 0.1% of the price, farmer the rest.
+        // Settled at the deadline, so the pool gets 800 + the full 2%; the platform 0.2% of
+        // the advance + 0.1% of the price; the farmer the rest.
         assert_eq!(m.pool().total_assets(), 4_016 * USDC);
         assert_eq!(m.usdc(&m.treasury), 16 * USDC / 10 + USDC);
         assert_eq!(m.usdc(&t.farmer), 800 * USDC + (PRICE - 816 * USDC - 16 * USDC / 10));
@@ -309,6 +311,42 @@ mod lending {
         assert_eq!(m.pool().exposure(&t.farmer), 0);
         // Alice owns 3/4 of the pool, so 3/4 of the 16 USDC yield.
         assert_eq!(m.pool().max_withdraw(&m.alice), 3_012 * USDC - 1);
+    }
+
+    #[test]
+    fn early_settlement_pays_yield_for_the_time_used_and_the_price_does_not_jump() {
+        let m = Market::new();
+        let t = m.funded_trade();
+        m.pool().advance(&t.escrow, &(800 * USDC));
+        m.validate(&t, true);
+        m.at(START + TERM / 2);
+        let before = m.pool().total_assets();
+        m.trade(&t).agent_release();
+
+        // Half the term used: the farmer pays half the 2% yield (8 USDC, not 16).
+        assert_eq!(before, 4_008 * USDC);
+        assert_eq!(m.pool().total_assets(), before);
+        assert_eq!(m.usdc(&t.farmer), 800 * USDC + (PRICE - 808 * USDC - 16 * USDC / 10));
+    }
+
+    #[test]
+    fn deposits_pause_while_an_advance_is_overdue_and_resume_once_it_is_settled() {
+        let m = Market::new();
+        let t = m.funded_trade();
+        m.pool().advance(&t.escrow, &(800 * USDC));
+        m.at(START + TERM + 1);
+        let late = Address::generate(&m.env);
+        m.give(&late, 1_000 * USDC);
+        assert_eq!(
+            m.pool().try_deposit(&(1_000 * USDC), &late, &late, &late),
+            Err(Ok(soroban_sdk::Error::from_contract_error(Error::DepositsPaused as u32)))
+        );
+        // Anyone may trigger the deadline refund; the pool is repaid first.
+        m.env.set_auths(&[]);
+        m.trade(&t).refund();
+        m.env.mock_all_auths();
+        assert_eq!(m.pool().total_assets(), 4_016 * USDC);
+        m.pool().deposit(&(1_000 * USDC), &late, &late, &late);
     }
 
     #[test]
@@ -352,6 +390,10 @@ mod lending {
         let t = m.funded_trade();
         m.pool().advance(&t.escrow, &(800 * USDC));
         m.validate(&t, false);
+        // The loss is booked when the delivery is rejected, not when the buyer refunds: in
+        // between, nobody can leave at a price that still counts the lost advance.
+        assert_eq!(m.pool().total_assets(), 3_200 * USDC);
+        assert_eq!(m.pool().max_withdraw(&m.alice), 2_400 * USDC);
         m.trade(&t).refund();
 
         assert_eq!(m.usdc(&t.buyer), 2_000 * USDC);
@@ -440,7 +482,7 @@ mod lending {
     #[should_panic(expected = "Error(Contract, #13)")]
     fn only_a_lent_escrow_can_report_a_repayment() {
         let m = Market::new();
-        m.pool().on_repaid(&Address::generate(&m.env));
+        m.pool().on_repaid(&Address::generate(&m.env), &(100 * USDC));
     }
 
     #[test]
@@ -451,10 +493,8 @@ mod lending {
         m.pool().onboard(&Address::generate(&m.env), &PRICE);
     }
 
-    // The deployed pool predates the Cancelled state. Financing a cancelled trade must still
-    // fail, and it does: the pool cannot even read that state, let alone treat it as funded.
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "Error(Contract, #7)")]
     fn a_cancelled_trade_cannot_be_financed() {
         let m = Market::new();
         let buyer = Address::generate(&m.env);
