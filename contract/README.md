@@ -8,6 +8,7 @@ Soroban workspace (`soroban-sdk` 29, target `wasm32v1-none`).
 |---|---|
 | `contracts/platform` | Avocate's single entry point. Holds the fee schedule and the service accounts (agent, validator), all admin-only; deploys one escrow per trade with the terms in force at that moment, and keeps the registry of every trade it created. Escrows deployed outside it are not Avocate operations. Upgradeable in place. |
 | `contracts/escrow` | One instance per trade. The buyer locks the price plus the trade fee in USDC. An independent validator attests the delivery once (conforming or not, with the report hash). The seller is paid the full price when the buyer confirms, or when the agent settles after a conforming validation; the agent can trigger nothing else. A rejected delivery or an expired deadline gives the buyer the whole deposit back. |
+| `contracts/pool` | Financing pool following the SEP-56 vault interface. Anyone can deposit USDC for shares and redeem them; in later steps it advances money to farmers against funded escrows. Shares are internal balances, not a transferable token. |
 
 Fee schedule (basis points, configurable by the platform admin):
 
@@ -16,6 +17,29 @@ Fee schedule (basis points, configurable by the platform admin):
 | `trade_fee_bps` | 10 (0.1%) | Buyer, on top of the price; refunded if the trade is refunded |
 | `financing_fee_bps` | 20 (0.2%) | Farmer, on an advance from the pool (not wired yet) |
 | `pool_yield_bps` | 200 (2%) | Farmer, to pool depositors (not wired yet) |
+
+## Security and anti-fraud rules
+
+Every rule below is enforced on-chain and covered by tests.
+
+**Trade escrow**
+- Trade terms (parties, token, price, fee, agent, validator, deadline) are fixed at creation; nobody can redirect the payout or change the amount.
+- Only the buyer can fund, confirm or claim a refund.
+- The validator attests a delivery **once**. A verdict that could be rewritten would let a negative attestation be swapped in later to unlock a refund.
+- The agent can only trigger the payout already agreed, and only after a conforming validation. It cannot choose recipients or amounts.
+- A refund before the deadline needs a non-conforming validation from the independent validator.
+- State changes before any token moves, so a trade can never be settled twice.
+
+**Platform**
+- Fee schedule, service accounts and escrow code are admin-only. Changes apply to new trades only; open trades keep the terms they were created with.
+- Only escrows deployed by the platform are listed in its registry, so an escrow created on custom terms cannot pass for an Avocate operation.
+
+**Financing pool**
+- Idle cash is tracked internally, so sending USDC straight to the pool cannot move the share price.
+- Virtual shares and assets (the OpenZeppelin mitigation referenced by SEP-56) make the first-depositor inflation attack unprofitable; a deposit too small to mint a share is rejected instead of being lost to rounding.
+- Rounding always favours the pool, so repeated small operations cannot drain the other depositors.
+- Shares are not transferable and there are no allowances: only the owner can deposit their funds or redeem their shares.
+- Only idle cash can be withdrawn; money lent to farmers stays in the pool until it is repaid.
 
 ## Build and test
 
