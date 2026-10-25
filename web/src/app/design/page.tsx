@@ -87,9 +87,15 @@ export default function Design() {
         </p>
       </section>
 
-      <div className="rounded-xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-sm text-rose-700">
-        Error message: the contract rejected the call (NotValidated).
-      </div>
+      <section className="card-glass p-6">
+        <p className="label">Error message (sample)</p>
+        <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50/70 px-4 py-3 text-sm text-rose-700">
+          The contract rejected the call (NotValidated).
+        </div>
+        <p className="mt-2 text-xs text-ink/70">
+          Shown when an on-chain call fails, with the contract error name.
+        </p>
+      </section>
     </main>
   );
 }
