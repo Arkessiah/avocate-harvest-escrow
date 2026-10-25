@@ -23,6 +23,8 @@ pub enum Error {
     AlreadyAdvanced = 8,
     /// Repaying the pool plus the financing fee must fit inside the price.
     AdvanceTooLarge = 9,
+    /// Only the buyer or the farmer of the trade may do this.
+    NotAParty = 10,
 }
 
 #[contracttype]
@@ -32,6 +34,8 @@ pub enum State {
     Funded,
     Released,
     Refunded,
+    /// Dropped before any money was deposited.
+    Cancelled,
 }
 
 /// Who takes part in the trade.
@@ -158,6 +162,12 @@ pub struct Refunded {
     pub amount: i128,
 }
 
+#[contractevent]
+pub struct Cancelled {
+    #[topic]
+    pub by: Address,
+}
+
 /// One instance per trade: the buyer locks the price in a stablecoin and the seller is
 /// paid the moment delivery is confirmed.
 #[contract]
@@ -209,6 +219,21 @@ impl Escrow {
             &(config.amount + fee),
         );
         Funded { buyer: config.buyer, amount: config.amount, fee }.publish(&env);
+        bump(&env);
+        Ok(())
+    }
+
+    /// Either party drops the trade while nothing has been deposited. Once the buyer has
+    /// funded it, the money only leaves through settlement or refund.
+    pub fn cancel(env: Env, by: Address) -> Result<(), Error> {
+        let config = config(&env);
+        require_state(&env, State::Pending)?;
+        if by != config.buyer && by != config.seller {
+            return Err(Error::NotAParty);
+        }
+        by.require_auth();
+        set_state(&env, State::Cancelled);
+        Cancelled { by }.publish(&env);
         bump(&env);
         Ok(())
     }

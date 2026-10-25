@@ -50,6 +50,7 @@ that is built.
 - The agent can only trigger the payout already agreed, and only after a conforming validation. It cannot choose recipients or amounts.
 - A refund before the deadline needs a non-conforming validation from the independent validator.
 - State changes before any token moves, so a trade can never be settled twice.
+- Before any money is deposited, the buyer or the farmer can cancel the trade (state `Cancelled`). Once funded it can only end through settlement or a refund, so no one can walk away with the other party's money. Trades created before this rule (escrow code earlier than v0.1.0) cannot be cancelled; the pool refuses to finance a cancelled trade.
 
 **Platform**
 - Fee schedule, service accounts and escrow code are admin-only. Changes apply to new trades only; open trades keep the terms they were created with.

@@ -312,3 +312,39 @@ fn rejects_a_pool_yield_above_100_percent() {
     let t = Terms { pool_yield_bps: 10_001, ..terms(&a, AMOUNT, FEE_BPS, DEADLINE) };
     env.register(Escrow, (same_parties(&a), t));
 }
+
+#[test]
+fn buyer_or_farmer_can_cancel_before_funding() {
+    for by_buyer in [true, false] {
+        let s = Setup::new(FEE_BPS);
+        let by = if by_buyer { s.buyer.clone() } else { s.seller.clone() };
+        s.client().cancel(&by);
+        assert_eq!(s.env.auths()[0].0, by);
+        assert_eq!(s.client().state(), State::Cancelled);
+        assert_eq!(s.client().try_fund(), Err(Ok(Error::InvalidState)));
+    }
+}
+
+#[test]
+fn cannot_cancel_once_funded() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    assert_eq!(s.client().try_cancel(&s.buyer), Err(Ok(Error::InvalidState)));
+    assert_eq!(s.client().try_cancel(&s.seller), Err(Ok(Error::InvalidState)));
+    assert_eq!(s.balance(&s.escrow), AMOUNT + FEE);
+}
+
+#[test]
+fn only_a_party_can_cancel() {
+    let s = Setup::new(FEE_BPS);
+    assert_eq!(s.client().try_cancel(&s.agent), Err(Ok(Error::NotAParty)));
+    assert_eq!(s.client().state(), State::Pending);
+}
+
+#[test]
+#[should_panic(expected = "Error(Auth, InvalidAction)")]
+fn cancel_needs_the_signature_of_who_cancels() {
+    let s = Setup::new(FEE_BPS);
+    s.env.set_auths(&[]);
+    s.client().cancel(&s.seller);
+}

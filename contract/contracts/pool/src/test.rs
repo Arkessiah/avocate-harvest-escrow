@@ -450,4 +450,18 @@ mod lending {
         m.env.set_auths(&[]);
         m.pool().onboard(&Address::generate(&m.env), &PRICE);
     }
+
+    // The deployed pool predates the Cancelled state. Financing a cancelled trade must still
+    // fail, and it does: the pool cannot even read that state, let alone treat it as funded.
+    #[test]
+    #[should_panic]
+    fn a_cancelled_trade_cannot_be_financed() {
+        let m = Market::new();
+        let buyer = Address::generate(&m.env);
+        let farmer = Address::generate(&m.env);
+        let escrow = platform::Client::new(&m.env, &m.platform).create_escrow(&buyer, &farmer, &PRICE, &(START + TERM));
+        escrow::Client::new(&m.env, &escrow).cancel(&farmer);
+        m.pool().onboard(&farmer, &(2_000 * USDC));
+        m.pool().advance(&escrow, &(100 * USDC));
+    }
 }
