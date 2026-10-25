@@ -183,7 +183,7 @@ const es: LandingCopy = {
   betaNote: "Beta en la red de pruebas de Stellar. Solo USDC de prueba: en esta web no se mueve dinero real.",
   homeLabel: "Avocate Harvest Escrow, inicio",
   openApp: "Abrir app",
-  headline: "El agricultor cobra en segundos. El comprador solo paga lo que llega.",
+  headline: "El agricultor cobra en segundos. El comprador solo paga lo que le llega.",
   lead: "El comprador bloquea el precio en USDC sobre Stellar. Un validador independiente revisa la entrega y el dinero llega al agricultor en cuanto se confirma. Un pool de financiación puede adelantarle una parte incluso antes.",
   startTrade: "Empezar una operación",
   howItWorks: "Cómo funciona",
