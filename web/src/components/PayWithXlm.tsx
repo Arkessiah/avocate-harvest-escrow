@@ -3,11 +3,8 @@
 import { useEffect, useState } from "react";
 import { useTx } from "@/components/TxProvider";
 import { formatUsdc } from "@/lib/usdc";
-import { quoteXlmFor, swapThenFund, withSlippage, xlmBalance } from "@/lib/swap";
+import { formatXlm, quoteXlmFor, swapThenFund, withSlippage, xlmBalance } from "@/lib/swap";
 import type { Trade } from "@/lib/trade";
-
-const formatXlm = (units: bigint) =>
-  `${(Number(units) / 1e7).toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} XLM`;
 
 // A buyer without enough USDC pays the difference in XLM: Soroswap swaps exactly what is
 // missing, then the trade is funded in USDC as usual. The escrow never sees XLM.

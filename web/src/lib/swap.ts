@@ -25,6 +25,9 @@ export async function quoteXlmFor(usdcOut: bigint): Promise<bigint> {
   return result.unwrap()[0];
 }
 
+export const formatXlm = (units: bigint) =>
+  `${(Number(units) / 1e7).toLocaleString("en", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} XLM`;
+
 export const withSlippage = (xlm: bigint) => xlm + (xlm * SLIPPAGE_BPS) / 10_000n;
 
 export async function xlmBalance(owner: string): Promise<bigint> {
@@ -41,7 +44,7 @@ export async function hasUsdcTrustline(owner: string): Promise<boolean> {
   }
 }
 
-async function addUsdcTrustline(owner: string): Promise<string> {
+export async function addUsdcTrustline(owner: string): Promise<string> {
   const [code, issuer] = network.usdc.asset.split(":");
   const horizon = new Horizon.Server(network.horizonUrl);
   const account = await horizon.loadAccount(owner);
@@ -82,4 +85,48 @@ export async function swapThenFund(
   }
   onStep("Deposit the payment into the trade");
   return invoke({ contractId: escrow, method: "fund" }, buyer, (s) => onStep(`Deposit · ${s}`));
+}
+
+// A plain swap in either direction, for anyone who wants USDC before trading or XLM after
+// being paid. The amount sent is exact; what arrives is quoted and protected by the same 1%.
+export type Direction = "xlm-to-usdc" | "usdc-to-xlm";
+
+const pathFor = (dir: Direction) =>
+  dir === "xlm-to-usdc" ? [network.xlm.contract, network.usdc.contract] : [network.usdc.contract, network.xlm.contract];
+
+export async function quoteOut(amountIn: bigint, dir: Direction): Promise<bigint> {
+  const result = await read<{ unwrap(): bigint[] }>(network.soroswap.router, "router_get_amounts_out", {
+    amount_in: amountIn,
+    path: pathFor(dir),
+  });
+  const amounts = result.unwrap();
+  return amounts[amounts.length - 1];
+}
+
+export const minReceived = (quoted: bigint) => quoted - (quoted * SLIPPAGE_BPS) / 10_000n;
+
+export async function swapExact(
+  { owner, amountIn, minOut, dir }: { owner: string; amountIn: bigint; minOut: bigint; dir: Direction },
+  onStep: (s: string) => void,
+): Promise<{ hash: string; result: unknown }> {
+  if (dir === "xlm-to-usdc" && !(await hasUsdcTrustline(owner))) {
+    onStep("Add a USDC trustline to your account");
+    await addUsdcTrustline(owner);
+  }
+  onStep("Swap on Soroswap");
+  return invoke(
+    {
+      contractId: network.soroswap.router,
+      method: "swap_exact_tokens_for_tokens",
+      args: {
+        amount_in: amountIn,
+        amount_out_min: minOut,
+        path: pathFor(dir),
+        to: owner,
+        deadline: BigInt(Math.floor(Date.now() / 1000) + 300),
+      },
+    },
+    owner,
+    onStep,
+  );
 }

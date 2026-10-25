@@ -125,7 +125,7 @@ The fixes made after the audit (no refund after a conforming delivery, the loss 
 | Pool and financing on testnet | Deployed; advances repaid, written off and open on testnet ([first end-to-end report](deploy/deployments/testnet-smoke.md)) |
 | Web app | Live at https://avocate-harvest-escrow.vercel.app: screens for buyer, farmer (co-signed advances), pool depositor, validator, agent and Avocate admin, plus a landing page in English, Spanish and Portuguese. The app screens are in English for now |
 | Agent with x402 payments | Live: buys the validator's delivery check over x402 before each release |
-| Pay in XLM (Soroswap) | Live on testnet: the buyer can fund a trade with XLM, swapped to USDC by Soroswap's router |
+| Pay in XLM (Soroswap) | Live on testnet: the buyer can fund a trade with XLM, swapped to USDC by Soroswap's router. A swap card on the buyer and farmer screens also turns XLM into USDC and back |
 | Trades agreed in person | Live: link or QR code, with an in-app scanner and sharing by message, email or QR |
 | Sample data | `scripts/seed.mjs` creates trades in every state, advances repaid and written off, and pool movements |
 | Dependencies | Alerts reviewed; Next.js upgrade planned after the hackathon ([review](audits/2026-10-25-dependency-alerts.md), issue #2) |

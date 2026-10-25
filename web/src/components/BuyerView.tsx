@@ -7,6 +7,7 @@ import { CreateTrade } from "@/components/CreateTrade";
 import { CancelTrade } from "@/components/CancelTrade";
 import { PayWithXlm } from "@/components/PayWithXlm";
 import { ProposeDeal } from "@/components/ProposeDeal";
+import { SwapCard } from "@/components/SwapCard";
 import { TradeCard } from "@/components/TradeCard";
 import { TradePicker } from "@/components/TradePicker";
 import { AdvanceApproval, useAdvanceCode } from "@/components/AdvanceApproval";
@@ -48,6 +49,7 @@ export function BuyerView() {
             }}
           />
           <ProposeDeal side="buyer" />
+          <SwapCard />
         </div>
         <div className="order-1 lg:order-none lg:col-span-3">
           <TradePicker current={tradeId} onSelect={setTradeId} party="buyer" version={version} />

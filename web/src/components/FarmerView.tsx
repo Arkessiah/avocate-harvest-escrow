@@ -6,6 +6,7 @@ import { useTx } from "@/components/TxProvider";
 import { TradeCard } from "@/components/TradeCard";
 import { TradePicker } from "@/components/TradePicker";
 import { ProposeDeal } from "@/components/ProposeDeal";
+import { SwapCard } from "@/components/SwapCard";
 import { ShareLink } from "@/components/ShareLink";
 import { CancelTrade } from "@/components/CancelTrade";
 import { useTrade, useTradeParam } from "@/components/useTrade";
@@ -23,8 +24,9 @@ export function FarmerView() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-5">
-      <div className="order-2 lg:order-none lg:col-span-2">
+      <div className="order-2 space-y-6 lg:order-none lg:col-span-2">
         <ProposeDeal side="farmer" />
+        <SwapCard />
       </div>
       <div className="order-1 lg:order-none lg:col-span-3">
         <TradePicker current={tradeId} onSelect={setTradeId} party="seller" version={version} />
