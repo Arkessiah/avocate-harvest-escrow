@@ -19,7 +19,7 @@ export function AppHeader() {
   return (
     <header className="mb-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <Link href={`/overview${query}`} className="flex items-center">
+        <Link href="/" className="flex items-center" aria-label="Avocate Harvest Escrow, home">
           <span className="flex items-baseline gap-2">
             <span className="text-2xl font-bold tracking-wide text-ink">AVOCATE</span>
             <span className="font-condensed text-[1.7rem] font-light leading-none text-brand-dark">Harvest Escrow</span>
