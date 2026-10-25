@@ -1,6 +1,6 @@
 # Avocate Harvest Escrow
 
-[![contracts](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml)
+[![contracts](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml) [![web](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/web.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/web.yml)
 
 **Version 0.0.3** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
 
