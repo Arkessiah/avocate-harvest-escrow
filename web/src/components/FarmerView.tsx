@@ -5,6 +5,7 @@ import { useWallet } from "@/components/WalletProvider";
 import { useTx } from "@/components/TxProvider";
 import { TradeCard } from "@/components/TradeCard";
 import { TradePicker } from "@/components/TradePicker";
+import { ProposeDeal } from "@/components/ProposeDeal";
 import { useTrade, useTradeParam } from "@/components/useTrade";
 import { network } from "@/lib/network";
 import { read } from "@/lib/chain";
@@ -19,21 +20,26 @@ export function FarmerView() {
   const [version, setVersion] = useState(0);
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <TradePicker current={tradeId} onSelect={setTradeId} party="seller" version={version} />
-      {error && <p className="card-glass p-6 text-sm text-rose-700">{error}</p>}
-      {loading && !trade && <p className="card-glass p-6 text-sm text-ink/70">Reading the trade from the network…</p>}
-      {trade && (
-        <TradeCard trade={trade}>
-          <FarmerActions
-            trade={trade}
-            onDone={() => {
-              refresh();
-              setVersion((v) => v + 1);
-            }}
-          />
-        </TradeCard>
-      )}
+    <div className="grid gap-6 lg:grid-cols-5">
+      <div className="lg:col-span-2">
+        <ProposeDeal side="farmer" />
+      </div>
+      <div className="lg:col-span-3">
+        <TradePicker current={tradeId} onSelect={setTradeId} party="seller" version={version} />
+        {error && <p className="card-glass p-6 text-sm text-rose-700">{error}</p>}
+        {loading && !trade && <p className="card-glass p-6 text-sm text-ink/70">Reading the trade from the network…</p>}
+        {trade && (
+          <TradeCard trade={trade}>
+            <FarmerActions
+              trade={trade}
+              onDone={() => {
+                refresh();
+                setVersion((v) => v + 1);
+              }}
+            />
+          </TradeCard>
+        )}
+      </div>
     </div>
   );
 }

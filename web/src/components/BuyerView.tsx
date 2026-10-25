@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useWallet } from "@/components/WalletProvider";
 import { useTx } from "@/components/TxProvider";
 import { CreateTrade } from "@/components/CreateTrade";
+import { ProposeDeal } from "@/components/ProposeDeal";
 import { TradeCard } from "@/components/TradeCard";
 import { TradePicker } from "@/components/TradePicker";
 import { AdvanceApproval, useAdvanceCode } from "@/components/AdvanceApproval";
@@ -37,13 +38,14 @@ export function BuyerView() {
         />
       )}
       <div className="grid gap-6 lg:grid-cols-5">
-        <div className="lg:col-span-2">
+        <div className="space-y-6 lg:col-span-2">
           <CreateTrade
             onCreated={(id) => {
               setTradeId(id);
               setVersion((v) => v + 1);
             }}
           />
+          <ProposeDeal side="buyer" />
         </div>
         <div className="lg:col-span-3">
           <TradePicker current={tradeId} onSelect={setTradeId} party="buyer" version={version} />

@@ -24,7 +24,9 @@ get an advance from a financing pool funded by buyers and other depositors.
 | **Avocate (platform)** | Sets the fee schedule, deploys every trade escrow and keeps the registry of trades. |
 
 Flow: `create → fund → (validate) → confirm by the buyer or release by the agent`, or
-`refund` when the deadline passes or the validator rejects the delivery.
+`refund` when the deadline passes or the validator rejects the delivery. A trade can be
+opened by the buyer alone, or agreed on the spot by both parties: one proposes and signs,
+the other completes it from a link or by scanning a QR code.
 
 ### Fees (configurable by the platform, snapshotted into each trade)
 
@@ -53,6 +55,7 @@ that is built.
 - Fee schedule, service accounts and escrow code are admin-only. Changes apply to new trades only; open trades keep the terms they were created with.
 - Only escrows deployed by the platform are listed in its registry, so an escrow created on custom terms cannot pass for an Avocate operation. `is_escrow` exposes that check in a single read for other contracts (the pool uses it before lending).
 - No trade can be opened until the admin links the financing pool, so every escrow knows from birth which pool may finance it.
+- A trade agreed on the spot (`create_trade`) needs both the buyer's and the farmer's signatures in the same transaction, so neither can open it on the other's behalf.
 
 **Financing pool**
 - Idle cash is tracked internally, so sending USDC straight to the pool cannot move the share price.
@@ -85,6 +88,7 @@ that is built.
 - Advance requests travel from the farmer to the buyer as a link. The request sits in the URL fragment, which browsers never send to any server.
 - The buyer's screen does not trust the link: it decodes the transaction they are about to sign and checks that it is a single call to the Avocate pool's `advance`, prepared for their account. The amounts shown come from that transaction.
 - The farmer's signature on a request expires after one hour.
+- Trade proposals work the same way: the link or QR code carries the compressed transaction, the receiving screen checks it is a single `create_trade` call on the Avocate platform prepared for the connected account, shows the terms read from it, and the proposer's signature expires after one hour. A damaged or oversized payload is refused before it is decoded.
 
 ## Status
 
