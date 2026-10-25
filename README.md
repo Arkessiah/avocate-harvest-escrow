@@ -72,6 +72,13 @@ that is built.
 - A loan past its deadline counts as zero in the pool value until it is repaid, so a depositor who sees a loss coming cannot exit at a price that still includes it.
 - The pool only accepts repayment and loss notices from escrows it actually lent to.
 
+**Service routes (web app)**
+- The agent and the demo validator sign on the server; their keys live in environment variables and never reach the browser.
+- Before signing, each route checks the request (size cap, per-IP rate limit, valid contract address), that the trade was deployed by the platform, that it names our agent or validator, and that it is in the right state, so a doomed call never costs a fee.
+- The agent route is safe to expose: the contract only lets it trigger the agreed payout after a conforming validation.
+- The validator route is a **demo convenience**, disabled unless `DEMO_VALIDATOR=true`. A real validator is an independent inspector signing with their own wallet; a public route signing as the validator would let anyone decide deliveries.
+- The inspection report stays off-chain; only its SHA-256 hash is recorded, so anyone holding the report can verify it.
+
 ## Status
 
 | Piece | State |
@@ -99,6 +106,10 @@ Nothing network-specific is hardcoded: RPC, passphrase, USDC and default fees li
 addresses to [`deploy/deployments/<network>.json`](deploy/deployments/testnet.json). Another network
 is a new config file, not a code change. Accounts are local identities of the Stellar CLI
 (`avocate-<network>-<role>`); their keys never leave the machine.
+
+Web app (`web/`): `pnpm install && pnpm dev`. Service routes need, in `web/.env.local` or in the
+hosting provider: `AGENT_SECRET`, `VALIDATOR_SECRET` (secret keys of the deployed agent and
+validator accounts) and, for the demo validator, `DEMO_VALIDATOR=true`. `pnpm test` runs the web unit tests.
 
 Current testnet deployment: [addresses](deploy/deployments/testnet.json) ·
 [end-to-end run](deploy/deployments/testnet-smoke.md).
