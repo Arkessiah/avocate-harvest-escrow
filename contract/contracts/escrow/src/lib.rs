@@ -1,7 +1,7 @@
 #![no_std]
 use soroban_sdk::{
     contract, contracterror, contractevent, contractimpl, contracttype, panic_with_error, token,
-    Address, Env,
+    Address, BytesN, Env,
 };
 
 const DAY_IN_LEDGERS: u32 = 17_280;
@@ -18,6 +18,8 @@ pub enum Error {
     InvalidAmount = 3,
     InvalidFee = 4,
     InvalidDeadline = 5,
+    AlreadyValidated = 6,
+    NotValidated = 7,
 }
 
 #[contracttype]
@@ -36,6 +38,10 @@ pub struct Config {
     pub buyer: Address,
     pub seller: Address,
     pub platform: Address,
+    /// Service account that may settle the trade on its own, once delivery is validated.
+    pub agent: Address,
+    /// Independent inspector that attests whether the delivery conforms.
+    pub validator: Address,
     pub token: Address,
     /// Price of the goods; the seller receives it in full.
     pub amount: i128,
@@ -50,6 +56,15 @@ pub struct Config {
 enum DataKey {
     Config,
     State,
+    Validation,
+}
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Validation {
+    pub ok: bool,
+    /// Hash of the inspection report kept off-chain, so the verdict can be audited later.
+    pub report_hash: BytesN<32>,
 }
 
 #[contractevent]
@@ -64,8 +79,18 @@ pub struct Funded {
 pub struct Released {
     #[topic]
     pub seller: Address,
+    /// Who settled: the buyer confirming, or the agent after a positive validation.
+    pub by: Address,
     pub amount: i128,
     pub fee: i128,
+}
+
+#[contractevent]
+pub struct Validated {
+    #[topic]
+    pub validator: Address,
+    pub ok: bool,
+    pub report_hash: BytesN<32>,
 }
 
 #[contractevent]
@@ -87,6 +112,8 @@ impl Escrow {
         buyer: Address,
         seller: Address,
         platform: Address,
+        agent: Address,
+        validator: Address,
         token: Address,
         amount: i128,
         trade_fee_bps: u32,
@@ -101,7 +128,8 @@ impl Escrow {
         if deadline <= env.ledger().timestamp() {
             panic_with_error!(&env, Error::InvalidDeadline);
         }
-        let config = Config { buyer, seller, platform, token, amount, trade_fee_bps, deadline };
+        let config =
+            Config { buyer, seller, platform, agent, validator, token, amount, trade_fee_bps, deadline };
         env.storage().instance().set(&DataKey::Config, &config);
         env.storage().instance().set(&DataKey::State, &State::Pending);
         bump(&env);
@@ -130,16 +158,49 @@ impl Escrow {
         let config = config(&env);
         require_state(&env, State::Funded)?;
         config.buyer.require_auth();
-        settle(&env, &config);
+        settle(&env, &config, &config.buyer);
         Ok(())
     }
 
-    /// Past the deadline without a confirmed delivery, the buyer recovers the whole deposit,
-    /// fee included: no delivery, no service charged.
+    /// The validator attests the delivery. Allowed once: a verdict that could be rewritten
+    /// would let a negative attestation be swapped in after the fact to unlock a refund.
+    pub fn validate(env: Env, ok: bool, report_hash: BytesN<32>) -> Result<(), Error> {
+        let config = config(&env);
+        require_state(&env, State::Funded)?;
+        if env.storage().instance().has(&DataKey::Validation) {
+            return Err(Error::AlreadyValidated);
+        }
+        config.validator.require_auth();
+
+        let validation = Validation { ok, report_hash: report_hash.clone() };
+        env.storage().instance().set(&DataKey::Validation, &validation);
+        Validated { validator: config.validator, ok, report_hash }.publish(&env);
+        bump(&env);
+        Ok(())
+    }
+
+    /// The agent settles on the buyer's behalf. Its only power is to trigger the payout
+    /// agreed at deploy time (recipients and amounts are fixed), and only after the
+    /// independent validator attested a conforming delivery.
+    pub fn agent_release(env: Env) -> Result<(), Error> {
+        let config = config(&env);
+        require_state(&env, State::Funded)?;
+        match validation(&env) {
+            Some(v) if v.ok => {}
+            _ => return Err(Error::NotValidated),
+        }
+        config.agent.require_auth();
+        settle(&env, &config, &config.agent);
+        Ok(())
+    }
+
+    /// The buyer recovers the whole deposit, fee included, once the deadline passes or as
+    /// soon as the validator rejects the delivery: no delivery, no service charged.
     pub fn refund(env: Env) -> Result<(), Error> {
         let config = config(&env);
         require_state(&env, State::Funded)?;
-        if env.ledger().timestamp() <= config.deadline {
+        let rejected = matches!(validation(&env), Some(v) if !v.ok);
+        if !rejected && env.ledger().timestamp() <= config.deadline {
             return Err(Error::NotExpired);
         }
         config.buyer.require_auth();
@@ -163,6 +224,14 @@ impl Escrow {
     pub fn config(env: Env) -> Config {
         config(&env)
     }
+
+    pub fn validation(env: Env) -> Option<Validation> {
+        validation(&env)
+    }
+}
+
+fn validation(env: &Env) -> Option<Validation> {
+    env.storage().instance().get(&DataKey::Validation)
 }
 
 // The constructor always writes Config, so an instance can never exist without it.
@@ -185,7 +254,7 @@ fn set_state(env: &Env, state: State) {
 
 // State moves before any token transfer, so a failing transfer reverts the whole call and
 // the escrow can never be settled twice.
-fn settle(env: &Env, config: &Config) {
+fn settle(env: &Env, config: &Config, by: &Address) {
     set_state(env, State::Released);
     let fee = trade_fee(config);
     let client = token::TokenClient::new(env, &config.token);
@@ -194,7 +263,8 @@ fn settle(env: &Env, config: &Config) {
     if fee > 0 {
         client.transfer(&escrow, &config.platform, &fee);
     }
-    Released { seller: config.seller.clone(), amount: config.amount, fee }.publish(env);
+    Released { seller: config.seller.clone(), by: by.clone(), amount: config.amount, fee }
+        .publish(env);
     bump(env);
 }
 

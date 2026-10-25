@@ -18,6 +18,8 @@ struct Setup {
     env: Env,
     admin: Address,
     treasury: Address,
+    agent: Address,
+    validator: Address,
     token: Address,
     platform: Address,
 }
@@ -30,10 +32,13 @@ impl Setup {
 
         let admin = Address::generate(&env);
         let treasury = Address::generate(&env);
+        let agent = Address::generate(&env);
+        let validator = Address::generate(&env);
         let token = env.register_stellar_asset_contract_v2(Address::generate(&env)).address();
         let wasm = env.deployer().upload_contract_wasm(escrow::WASM);
-        let platform = env.register(Platform, (&admin, &token, &treasury, wasm, FEES));
-        Setup { env, admin, treasury, token, platform }
+        let platform =
+            env.register(Platform, (&admin, &token, &treasury, &agent, &validator, wasm, FEES));
+        Setup { env, admin, treasury, agent, validator, token, platform }
     }
 
     fn client(&self) -> PlatformClient<'_> {
@@ -67,6 +72,8 @@ fn escrow_snapshots_platform_terms() {
     assert_eq!(config.buyer, buyer);
     assert_eq!(config.seller, seller);
     assert_eq!(config.platform, s.treasury);
+    assert_eq!(config.agent, s.agent);
+    assert_eq!(config.validator, s.validator);
     assert_eq!(config.token, s.token);
     assert_eq!(config.trade_fee_bps, FEES.trade_fee_bps);
 }
@@ -149,4 +156,28 @@ fn non_admin_cannot_swap_the_escrow_code() {
     let s = Setup::new();
     s.env.set_auths(&[]);
     s.client().set_escrow_wasm(&BytesN::from_array(&s.env, &[7; 32]));
+}
+
+#[test]
+fn operator_change_only_applies_to_new_trades() {
+    let s = Setup::new();
+    let (_, _, before) = s.open_trade(USDC);
+    let new_agent = Address::generate(&s.env);
+    s.client().set_operators(&new_agent, &s.validator);
+    assert_eq!(s.env.auths()[0].0, s.admin);
+    let (_, _, after) = s.open_trade(USDC);
+
+    assert_eq!(escrow::Client::new(&s.env, &before).config().agent, s.agent);
+    assert_eq!(escrow::Client::new(&s.env, &after).config().agent, new_agent);
+}
+
+#[test]
+fn agent_settles_a_validated_platform_trade() {
+    let s = Setup::new();
+    let (_, seller, escrow) = s.open_trade(1_000 * USDC);
+    let trade = escrow::Client::new(&s.env, &escrow);
+    trade.fund();
+    trade.validate(&true, &BytesN::from_array(&s.env, &[9; 32]));
+    trade.agent_release();
+    assert_eq!(TokenClient::new(&s.env, &s.token).balance(&seller), 1_000 * USDC);
 }

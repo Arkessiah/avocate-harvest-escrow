@@ -204,6 +204,14 @@
                         "map": [
                           {
                             "key": {
+                              "symbol": "agent"
+                            },
+                            "val": {
+                              "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
+                            }
+                          },
+                          {
+                            "key": {
                               "symbol": "amount"
                             },
                             "val": {
@@ -256,6 +264,14 @@
                             },
                             "val": {
                               "u32": 10
+                            }
+                          },
+                          {
+                            "key": {
+                              "symbol": "validator"
+                            },
+                            "val": {
+                              "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
                             }
                           }
                         ]

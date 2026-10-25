@@ -3,7 +3,7 @@
 use super::*;
 use soroban_sdk::testutils::{Address as _, Ledger};
 use soroban_sdk::token::{StellarAssetClient, TokenClient};
-use soroban_sdk::{Address, Env};
+use soroban_sdk::{Address, BytesN, Env};
 
 const USDC: i128 = 10_000_000; // 7 decimals
 const AMOUNT: i128 = 1_000 * USDC;
@@ -18,6 +18,8 @@ struct Setup {
     buyer: Address,
     seller: Address,
     platform: Address,
+    agent: Address,
+    validator: Address,
     token: Address,
     escrow: Address,
 }
@@ -32,18 +34,24 @@ impl Setup {
         let buyer = Address::generate(&env);
         let seller = Address::generate(&env);
         let platform = Address::generate(&env);
+        let agent = Address::generate(&env);
+        let validator = Address::generate(&env);
         let token = env.register_stellar_asset_contract_v2(issuer).address();
         StellarAssetClient::new(&env, &token).mint(&buyer, &(5_000 * USDC));
 
         let escrow = env.register(
             Escrow,
-            (&buyer, &seller, &platform, &token, AMOUNT, fee_bps, DEADLINE),
+            (&buyer, &seller, &platform, &agent, &validator, &token, AMOUNT, fee_bps, DEADLINE),
         );
-        Setup { env, buyer, seller, platform, token, escrow }
+        Setup { env, buyer, seller, platform, agent, validator, token, escrow }
     }
 
     fn client(&self) -> EscrowClient<'_> {
         EscrowClient::new(&self.env, &self.escrow)
+    }
+
+    fn report(&self) -> BytesN<32> {
+        BytesN::from_array(&self.env, &[1; 32])
     }
 
     fn balance(&self, who: &Address) -> i128 {
@@ -157,7 +165,7 @@ fn fee_rounds_down_on_tiny_amounts() {
     let token = env.register_stellar_asset_contract_v2(issuer).address();
     StellarAssetClient::new(&env, &token).mint(&buyer, &10_000);
     // 999 base units at 0.1% is 0.999 -> 0: the platform waives the fraction.
-    let escrow = env.register(Escrow, (&buyer, &a, &a, &token, 999_i128, FEE_BPS, DEADLINE));
+    let escrow = env.register(Escrow, (&buyer, &a, &a, &a, &a, &token, 999_i128, FEE_BPS, DEADLINE));
     EscrowClient::new(&env, &escrow).fund();
     assert_eq!(TokenClient::new(&env, &token).balance(&buyer), 10_000 - 999);
 }
@@ -174,5 +182,91 @@ fn rejects_a_deadline_in_the_past() {
     let env = Env::default();
     env.ledger().set_timestamp(DEADLINE + 1);
     let a = Address::generate(&env);
-    env.register(Escrow, (&a, &a, &a, &a, AMOUNT, FEE_BPS, DEADLINE));
+    env.register(Escrow, (&a, &a, &a, &a, &a, &a, AMOUNT, FEE_BPS, DEADLINE));
+}
+
+#[test]
+fn validator_records_its_verdict_once() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    s.client().validate(&true, &s.report());
+    assert_eq!(s.env.auths()[0].0, s.validator);
+
+    let v = s.client().validation().unwrap();
+    assert!(v.ok);
+    assert_eq!(v.report_hash, s.report());
+    assert_eq!(s.client().try_validate(&false, &s.report()), Err(Ok(Error::AlreadyValidated)));
+}
+
+#[test]
+fn cannot_validate_an_unfunded_trade() {
+    let s = Setup::new(FEE_BPS);
+    assert_eq!(s.client().try_validate(&true, &s.report()), Err(Ok(Error::InvalidState)));
+}
+
+#[test]
+fn agent_cannot_release_without_a_validation() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    assert_eq!(s.client().try_agent_release(), Err(Ok(Error::NotValidated)));
+}
+
+#[test]
+fn agent_cannot_release_a_rejected_delivery() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    s.client().validate(&false, &s.report());
+    assert_eq!(s.client().try_agent_release(), Err(Ok(Error::NotValidated)));
+}
+
+#[test]
+fn agent_releases_the_agreed_payout_after_a_positive_validation() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    s.client().validate(&true, &s.report());
+    s.client().agent_release();
+    assert_eq!(s.env.auths()[0].0, s.agent);
+
+    assert_eq!(s.client().state(), State::Released);
+    assert_eq!(s.balance(&s.seller), AMOUNT);
+    assert_eq!(s.balance(&s.platform), FEE);
+    assert_eq!(s.balance(&s.escrow), 0);
+}
+
+#[test]
+#[should_panic]
+fn only_the_agent_can_release() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    s.client().validate(&true, &s.report());
+    s.env.set_auths(&[]);
+    s.client().agent_release();
+}
+
+#[test]
+#[should_panic]
+fn only_the_validator_can_validate() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    s.env.set_auths(&[]);
+    s.client().validate(&false, &s.report());
+}
+
+#[test]
+fn a_rejected_delivery_unlocks_the_refund_before_the_deadline() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    s.client().validate(&false, &s.report());
+    s.client().refund();
+
+    assert_eq!(s.client().state(), State::Refunded);
+    assert_eq!(s.balance(&s.buyer), 5_000 * USDC);
+}
+
+#[test]
+fn a_positive_validation_does_not_unlock_an_early_refund() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    s.client().validate(&true, &s.report());
+    assert_eq!(s.client().try_refund(), Err(Ok(Error::NotExpired)));
 }

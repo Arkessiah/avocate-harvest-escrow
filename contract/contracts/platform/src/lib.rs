@@ -35,6 +35,8 @@ enum DataKey {
     Admin,
     Token,
     Treasury,
+    Agent,
+    Validator,
     EscrowWasm,
     Fees,
     EscrowCount,
@@ -69,6 +71,8 @@ impl Platform {
         admin: Address,
         token: Address,
         treasury: Address,
+        agent: Address,
+        validator: Address,
         escrow_wasm: BytesN<32>,
         fees: Fees,
     ) {
@@ -77,6 +81,8 @@ impl Platform {
         store.set(&DataKey::Admin, &admin);
         store.set(&DataKey::Token, &token);
         store.set(&DataKey::Treasury, &treasury);
+        store.set(&DataKey::Agent, &agent);
+        store.set(&DataKey::Validator, &validator);
         store.set(&DataKey::EscrowWasm, &escrow_wasm);
         store.set(&DataKey::Fees, &fees);
         store.set(&DataKey::EscrowCount, &0u32);
@@ -94,6 +100,16 @@ impl Platform {
     pub fn set_treasury(env: Env, treasury: Address) {
         admin(&env).require_auth();
         env.storage().instance().set(&DataKey::Treasury, &treasury);
+        bump(&env);
+    }
+
+    /// Service accounts copied into every new trade: the agent that may settle after a
+    /// positive validation, and the independent validator. Open trades keep theirs.
+    pub fn set_operators(env: Env, agent: Address, validator: Address) {
+        admin(&env).require_auth();
+        let store = env.storage().instance();
+        store.set(&DataKey::Agent, &agent);
+        store.set(&DataKey::Validator, &validator);
         bump(&env);
     }
 
@@ -127,11 +143,15 @@ impl Platform {
         let wasm: BytesN<32> = store.get(&DataKey::EscrowWasm).unwrap();
         let token: Address = store.get(&DataKey::Token).unwrap();
         let treasury: Address = store.get(&DataKey::Treasury).unwrap();
+        let agent: Address = store.get(&DataKey::Agent).unwrap();
+        let validator: Address = store.get(&DataKey::Validator).unwrap();
 
         let args: Vec<Val> = (
             buyer.clone(),
             seller.clone(),
             treasury,
+            agent,
+            validator,
             token,
             amount,
             fees.trade_fee_bps,
@@ -160,6 +180,11 @@ impl Platform {
 
     pub fn treasury(env: Env) -> Address {
         env.storage().instance().get(&DataKey::Treasury).unwrap()
+    }
+
+    pub fn operators(env: Env) -> (Address, Address) {
+        let store = env.storage().instance();
+        (store.get(&DataKey::Agent).unwrap(), store.get(&DataKey::Validator).unwrap())
     }
 
     pub fn token(env: Env) -> Address {

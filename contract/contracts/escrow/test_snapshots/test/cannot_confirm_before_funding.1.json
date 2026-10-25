@@ -1,6 +1,6 @@
 {
   "generators": {
-    "address": 6,
+    "address": 8,
     "nonce": 0,
     "mux_id": 0
   },
@@ -8,11 +8,11 @@
     [],
     [
       [
-        "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL7NV",
+        "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPP4V",
         {
           "function": {
             "contract_fn": {
-              "contract_address": "CDLDVFKHEZ2RVB3NG4UQA4VPD3TSHV6XMHXMHP2BSGCJ2IIWVTOHGDSG",
+              "contract_address": "CDS3FDGQ4JA2V3F26Y4BMWWJEC5TT26RJBN7KIQKUMVO2MAOCMDTSZ7A",
               "function_name": "set_admin",
               "args": [
                 {
@@ -31,7 +31,7 @@
         {
           "function": {
             "contract_fn": {
-              "contract_address": "CDLDVFKHEZ2RVB3NG4UQA4VPD3TSHV6XMHXMHP2BSGCJ2IIWVTOHGDSG",
+              "contract_address": "CDS3FDGQ4JA2V3F26Y4BMWWJEC5TT26RJBN7KIQKUMVO2MAOCMDTSZ7A",
               "function_name": "mint",
               "args": [
                 {
@@ -65,7 +65,7 @@
           "last_modified_ledger_seq": 0,
           "data": {
             "account": {
-              "account_id": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL7NV",
+              "account_id": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPP4V",
               "balance": "0",
               "seq_num": "0",
               "num_sub_entries": 0,
@@ -87,7 +87,7 @@
           "data": {
             "contract_data": {
               "ext": "v0",
-              "contract": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL7NV",
+              "contract": "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPP4V",
               "key": {
                 "ledger_key_nonce": {
                   "nonce": "801925984706572462"
@@ -127,13 +127,13 @@
           "data": {
             "contract_data": {
               "ext": "v0",
-              "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDR4",
+              "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARQG5",
               "key": "ledger_key_contract_instance",
               "durability": "persistent",
               "val": {
                 "contract_instance": {
                   "executable": {
-                    "wasm": "95616f137b71f2524c5c1a9911d7c51abf81930f93f7a6cae2fa8967c03d14fb"
+                    "wasm": "fd6c588c7f264c1900d67e02e7dbd87128703163e6287de876a613c87226fd6c"
                   },
                   "storage": [
                     {
@@ -146,6 +146,14 @@
                       },
                       "val": {
                         "map": [
+                          {
+                            "key": {
+                              "symbol": "agent"
+                            },
+                            "val": {
+                              "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM"
+                            }
+                          },
                           {
                             "key": {
                               "symbol": "amount"
@@ -191,7 +199,7 @@
                               "symbol": "token"
                             },
                             "val": {
-                              "address": "CDLDVFKHEZ2RVB3NG4UQA4VPD3TSHV6XMHXMHP2BSGCJ2IIWVTOHGDSG"
+                              "address": "CDS3FDGQ4JA2V3F26Y4BMWWJEC5TT26RJBN7KIQKUMVO2MAOCMDTSZ7A"
                             }
                           },
                           {
@@ -200,6 +208,14 @@
                             },
                             "val": {
                               "u32": 10
+                            }
+                          },
+                          {
+                            "key": {
+                              "symbol": "validator"
+                            },
+                            "val": {
+                              "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDR4"
                             }
                           }
                         ]
@@ -236,7 +252,7 @@
           "data": {
             "contract_data": {
               "ext": "v0",
-              "contract": "CDLDVFKHEZ2RVB3NG4UQA4VPD3TSHV6XMHXMHP2BSGCJ2IIWVTOHGDSG",
+              "contract": "CDS3FDGQ4JA2V3F26Y4BMWWJEC5TT26RJBN7KIQKUMVO2MAOCMDTSZ7A",
               "key": {
                 "vec": [
                   {
@@ -288,7 +304,7 @@
           "data": {
             "contract_data": {
               "ext": "v0",
-              "contract": "CDLDVFKHEZ2RVB3NG4UQA4VPD3TSHV6XMHXMHP2BSGCJ2IIWVTOHGDSG",
+              "contract": "CDS3FDGQ4JA2V3F26Y4BMWWJEC5TT26RJBN7KIQKUMVO2MAOCMDTSZ7A",
               "key": "ledger_key_contract_instance",
               "durability": "persistent",
               "val": {
@@ -314,7 +330,7 @@
                               "symbol": "name"
                             },
                             "val": {
-                              "string": "aaa:GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL7NV"
+                              "string": "aaa:GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPP4V"
                             }
                           },
                           {
@@ -368,7 +384,7 @@
                                   "symbol": "issuer"
                                 },
                                 "val": {
-                                  "bytes": "0000000000000000000000000000000000000000000000000000000000000005"
+                                  "bytes": "0000000000000000000000000000000000000000000000000000000000000007"
                                 }
                               }
                             ]
@@ -391,8 +407,8 @@
           "data": {
             "contract_code": {
               "ext": "v0",
-              "hash": "95616f137b71f2524c5c1a9911d7c51abf81930f93f7a6cae2fa8967c03d14fb",
-              "code": "746573745f636f6e74726163745f666f725f636f6e74726163745f69645f434141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414d445234"
+              "hash": "fd6c588c7f264c1900d67e02e7dbd87128703163e6287de876a613c87226fd6c",
+              "code": "746573745f636f6e74726163745f666f725f636f6e74726163745f69645f4341414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414141414152514735"
             }
           },
           "ext": "v0"
