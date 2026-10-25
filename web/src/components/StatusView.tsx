@@ -29,47 +29,51 @@ export function StatusView() {
 
   return (
     <AppShell>
-      <h1 className="text-lg font-semibold">Farmers get paid in seconds once delivery is confirmed.</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Farmers get paid in seconds once delivery is confirmed.</h1>
 
-      <section className="card mt-4 p-6">
-        <p className="label">Network</p>
-        <p className="font-medium">
-          Stellar {network.name} · deployed {new Date(network.deployedAt).toLocaleString("en")}
-        </p>
+      <div className="mt-6 grid gap-4 lg:grid-cols-6">
+        <section className="card-highlight p-6 lg:col-span-3">
+          <h2 className="text-sm font-medium text-ink/70">Trades on the platform</h2>
+          <p className="figure-xl mt-2">{trades ?? "…"}</p>
+          <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-2 text-sm">
+            <div>
+              <dt className="text-ink/70">Trade fee (buyer)</dt>
+              <dd className="font-semibold">{fees ? pct(fees.trade_fee_bps) : "…"}</dd>
+            </div>
+            <div>
+              <dt className="text-ink/70">Financing fee</dt>
+              <dd className="font-semibold">{fees ? pct(fees.financing_fee_bps) : "…"}</dd>
+            </div>
+            <div>
+              <dt className="text-ink/70">Pool yield</dt>
+              <dd className="font-semibold">{fees ? pct(fees.pool_yield_bps) : "…"}</dd>
+            </div>
+          </dl>
+          {error && <p className="mt-4 text-sm text-danger">{error}</p>}
+        </section>
 
-        <ul className="mt-4 space-y-2 text-sm">
-          {contracts.map(([label, id]) => (
-            <li key={id} className="flex items-center justify-between gap-4">
-              <span className="text-ink/70">{label}</span>
-              <a
-                className="font-mono text-brand-dark hover:underline"
-                href={`${network.explorerContract}${id}`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {short(id)} ↗
-              </a>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-4">
-          <Stat label="Trade fee" value={fees ? pct(fees.trade_fee_bps) : "…"} />
-          <Stat label="Financing fee" value={fees ? pct(fees.financing_fee_bps) : "…"} />
-          <Stat label="Pool yield" value={fees ? pct(fees.pool_yield_bps) : "…"} />
-          <Stat label="Trades" value={trades ?? "…"} />
-        </div>
-        {error && <p className="mt-4 text-sm text-danger">{error}</p>}
-      </section>
+        <section className="card p-6 lg:col-span-3">
+          <h2 className="text-sm font-medium text-ink/70">Network</h2>
+          <p className="mt-1 font-medium">
+            Stellar {network.name} · deployed {new Date(network.deployedAt).toLocaleDateString("en", { dateStyle: "medium" })}
+          </p>
+          <ul className="mt-4 divide-y divide-ink/5 text-sm">
+            {contracts.map(([label, id]) => (
+              <li key={id} className="flex items-center justify-between gap-4 py-2">
+                <span className="text-ink/70">{label}</span>
+                <a
+                  className="font-mono text-brand-dark hover:underline"
+                  href={`${network.explorerContract}${id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {short(id)} ↗
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
     </AppShell>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-xl bg-mist/70 px-4 py-3">
-      <p className="label">{label}</p>
-      <p className="text-lg font-semibold">{value}</p>
-    </div>
   );
 }

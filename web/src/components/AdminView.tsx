@@ -74,22 +74,49 @@ export function AdminView() {
     data.trades.filter((t) => states.includes(t.state)).reduce((s, t) => s + t.config.amount, 0n);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {!isAdmin && (
-        <p className="rounded-xl border border-brand/20 bg-mist/70 px-4 py-3 text-sm text-ink/70">
-          Read-only view. Changes need Avocate's admin wallet ({short(data.admin)}).
+        <p className="text-sm text-ink/70">
+          Read-only view. Changes need Avocate&apos;s admin wallet ({short(data.admin)}).
         </p>
       )}
 
-      <section aria-label="Platform overview" className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Stat label="Trades" value={String(data.trades.length)} hint={`${data.trades.filter((t) => t.state === "Funded").length} in progress`} />
-        <Stat label="Locked now" value={formatUsdc(sum(["Funded"]))} hint="Deposits waiting for delivery" />
-        <Stat label="Paid to farmers" value={formatUsdc(sum(["Released"]))} hint="Price of settled trades" />
-        <Stat label="Fees earned" value={formatUsdc(data.earned)} hint={`Treasury ${short(data.treasury, 4)}`} />
-        <Stat label="Pool value" value={formatUsdc(data.pool.totalAssets)} hint={`${data.pool.loans.length} open advances`} link="/pool" />
+      <section aria-label="Platform overview" className="grid gap-4 lg:grid-cols-6">
+        <div className="card-highlight p-6 lg:col-span-4">
+          <h2 className="text-sm font-medium text-ink/70">Paid to farmers</h2>
+          <p className="figure-xl mt-2">
+            {amountOf(sum(["Released"]))} <span className="text-2xl text-ink/70">USDC</span>
+          </p>
+          <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-2 text-sm">
+            <div>
+              <dt className="text-ink/70">Trades</dt>
+              <dd className="font-semibold">{data.trades.length}</dd>
+            </div>
+            <div>
+              <dt className="text-ink/70">In progress</dt>
+              <dd className="font-semibold">{data.trades.filter((t) => t.state === "Funded").length}</dd>
+            </div>
+            <div>
+              <dt className="text-ink/70">Locked now</dt>
+              <dd className="font-semibold">{formatUsdc(sum(["Funded"]))}</dd>
+            </div>
+          </dl>
+        </div>
+        <div className="card flex flex-col justify-between gap-4 p-6 lg:col-span-2">
+          <div>
+            <h2 className="text-sm font-medium text-ink/70">Fees earned</h2>
+            <p className="mt-2 font-condensed text-4xl leading-none">
+              {amountOf(data.earned)} <span className="text-lg text-ink/70">USDC</span>
+            </p>
+            <p className="mt-2 text-xs text-ink/70">Treasury {short(data.treasury, 4)}</p>
+          </div>
+          <Link href="/pool" className="text-sm text-brand-dark hover:underline">
+            Pool value {formatUsdc(data.pool.totalAssets)} · {data.pool.loans.length} open advance{data.pool.loans.length === 1 ? "" : "s"} →
+          </Link>
+        </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <FeesCard fees={data.fees} isAdmin={isAdmin} onDone={refresh} />
         <FarmersCard farmers={data.farmers} isAdmin={isAdmin} onDone={refresh} />
       </div>
@@ -99,15 +126,7 @@ export function AdminView() {
   );
 }
 
-function Stat({ label, value, hint, link }: { label: string; value: string; hint?: string; link?: string }) {
-  return (
-    <div className="card px-4 py-3">
-      <p className="label">{label}</p>
-      <p className="text-lg font-semibold">{link ? <Link href={link} className="hover:underline">{value}</Link> : value}</p>
-      {hint && <p className="mt-0.5 text-xs text-ink/70">{hint}</p>}
-    </div>
-  );
-}
+const amountOf = (units: bigint) => formatUsdc(units).replace(" USDC", "");
 
 const FEE_FIELDS: { key: keyof Fees; label: string; who: string }[] = [
   { key: "trade_fee_bps", label: "Trade fee", who: "Paid by the buyer on top of the price; refunded if the trade is refunded." },
