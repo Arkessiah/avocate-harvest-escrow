@@ -6,7 +6,7 @@ Soroban workspace (`soroban-sdk` 29, target `wasm32v1-none`).
 
 | Contract | Purpose |
 |---|---|
-| `contracts/platform` | Avocate's single entry point. Holds the fee schedule, the service accounts (agent, validator) and the linked financing pool, all admin-only; deploys one escrow per trade with the terms in force at that moment, and keeps the registry of every trade it created. Escrows deployed outside it are not Avocate operations. Upgradeable in place. |
+| `contracts/platform` | Avocate's single entry point. Holds the fee schedule, the service accounts (agent, validator) and the linked financing pool, all admin-only; deploys one escrow per trade with the terms in force at that moment (`create_escrow`, signed by the buyer, or `create_trade`, signed by buyer and farmer), and keeps the registry of every trade it created. Escrows deployed outside it are not Avocate operations. Upgradeable in place. |
 | `contracts/escrow` | One instance per trade. The buyer locks the price plus the trade fee in USDC. An independent validator attests the delivery once (conforming or not, with the report hash). The seller is paid the full price when the buyer confirms, or when the agent settles after a conforming validation; the agent can trigger nothing else. A rejected delivery or an expired deadline gives the buyer the whole deposit back. |
 | `contracts/pool` | Financing pool following the SEP-56 vault interface. Anyone can deposit USDC for shares and redeem them; it advances money to onboarded farmers against funded Avocate escrows and is repaid when the trade settles. Shares are internal balances, not a transferable token. |
 

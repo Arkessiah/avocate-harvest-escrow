@@ -215,3 +215,36 @@ fn non_admin_cannot_link_a_pool() {
     s.env.set_auths(&[]);
     s.client().set_pool(&Address::generate(&s.env));
 }
+
+#[test]
+fn create_trade_needs_buyer_and_farmer() {
+    let s = Setup::new();
+    let buyer = Address::generate(&s.env);
+    let seller = Address::generate(&s.env);
+    let escrow = s.client().create_trade(&buyer, &seller, &(500 * USDC), &DEADLINE);
+
+    let auths = s.env.auths();
+    assert!(auths.iter().any(|(a, _)| *a == buyer));
+    assert!(auths.iter().any(|(a, _)| *a == seller));
+    assert!(s.client().is_escrow(&escrow));
+    let config = escrow::Client::new(&s.env, &escrow).config();
+    assert_eq!((config.buyer, config.seller, config.amount), (buyer, seller, 500 * USDC));
+}
+
+#[test]
+#[should_panic(expected = "Error(Auth, InvalidAction)")]
+fn create_trade_fails_without_the_farmer() {
+    use soroban_sdk::testutils::{MockAuth, MockAuthInvoke};
+    use soroban_sdk::IntoVal;
+
+    let s = Setup::new();
+    let buyer = Address::generate(&s.env);
+    let seller = Address::generate(&s.env);
+    let args = (&buyer, &seller, 500 * USDC, DEADLINE).into_val(&s.env);
+    // Only the buyer signs: the farmer's authorization is missing.
+    s.env.mock_auths(&[MockAuth {
+        address: &buyer,
+        invoke: &MockAuthInvoke { contract: &s.platform, fn_name: "create_trade", args, sub_invokes: &[] },
+    }]);
+    s.client().create_trade(&buyer, &seller, &(500 * USDC), &DEADLINE);
+}

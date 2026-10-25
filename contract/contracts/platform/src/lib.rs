@@ -174,53 +174,21 @@ impl Platform {
         deadline: u64,
     ) -> Address {
         buyer.require_auth();
-        let store = env.storage().instance();
-        let index: u32 = store.get(&DataKey::EscrowCount).unwrap();
-        let fees: Fees = store.get(&DataKey::Fees).unwrap();
-        let wasm: BytesN<32> = store.get(&DataKey::EscrowWasm).unwrap();
-        let token: Address = store.get(&DataKey::Token).unwrap();
-        let treasury: Address = store.get(&DataKey::Treasury).unwrap();
-        let agent: Address = store.get(&DataKey::Agent).unwrap();
-        let validator: Address = store.get(&DataKey::Validator).unwrap();
-        let pool: Address = match store.get(&DataKey::Pool) {
-            Some(p) => p,
-            None => panic_with_error!(&env, Error::PoolNotSet),
-        };
+        open_trade(&env, buyer, seller, amount, deadline)
+    }
 
-        let parties = Parties {
-            buyer: buyer.clone(),
-            seller: seller.clone(),
-            platform: treasury,
-            agent,
-            validator,
-            pool,
-        };
-        let terms = Terms {
-            token,
-            amount,
-            trade_fee_bps: fees.trade_fee_bps,
-            financing_fee_bps: fees.financing_fee_bps,
-            pool_yield_bps: fees.pool_yield_bps,
-            deadline,
-        };
-        let args: Vec<Val> = (parties, terms).into_val(&env);
-        // The registry index is the salt: unique per platform, so addresses never collide
-        // and anyone can recompute where escrow N lives.
-        let escrow = env
-            .deployer()
-            .with_current_contract(salt(&env, index))
-            .deploy_contract(ContractExecutable::Wasm(wasm), args);
-
-        let key = DataKey::Escrow(index);
-        env.storage().persistent().set(&key, &escrow);
-        env.storage().persistent().extend_ttl(&key, BUMP_THRESHOLD, BUMP_TO);
-        let reverse = DataKey::EscrowIndex(escrow.clone());
-        env.storage().persistent().set(&reverse, &index);
-        env.storage().persistent().extend_ttl(&reverse, BUMP_THRESHOLD, BUMP_TO);
-        store.set(&DataKey::EscrowCount, &(index + 1));
-        EscrowCreated { buyer, seller, index, escrow: escrow.clone(), amount }.publish(&env);
-        bump(&env);
-        escrow
+    /// Same as `create_escrow`, but the farmer signs the terms too: a sale agreed by both
+    /// parties on the spot (one proposes, the other completes from a link or a QR code).
+    pub fn create_trade(
+        env: Env,
+        buyer: Address,
+        seller: Address,
+        amount: i128,
+        deadline: u64,
+    ) -> Address {
+        buyer.require_auth();
+        seller.require_auth();
+        open_trade(&env, buyer, seller, amount, deadline)
     }
 
     pub fn fees(env: Env) -> Fees {
@@ -274,6 +242,56 @@ impl Platform {
 
 fn admin(env: &Env) -> Address {
     env.storage().instance().get(&DataKey::Admin).unwrap()
+}
+
+fn open_trade(env: &Env, buyer: Address, seller: Address, amount: i128, deadline: u64) -> Address {
+    let store = env.storage().instance();
+    let index: u32 = store.get(&DataKey::EscrowCount).unwrap();
+    let fees: Fees = store.get(&DataKey::Fees).unwrap();
+    let wasm: BytesN<32> = store.get(&DataKey::EscrowWasm).unwrap();
+    let token: Address = store.get(&DataKey::Token).unwrap();
+    let treasury: Address = store.get(&DataKey::Treasury).unwrap();
+    let agent: Address = store.get(&DataKey::Agent).unwrap();
+    let validator: Address = store.get(&DataKey::Validator).unwrap();
+    let pool: Address = match store.get(&DataKey::Pool) {
+        Some(p) => p,
+        None => panic_with_error!(env, Error::PoolNotSet),
+    };
+
+    let parties = Parties {
+        buyer: buyer.clone(),
+        seller: seller.clone(),
+        platform: treasury,
+        agent,
+        validator,
+        pool,
+    };
+    let terms = Terms {
+        token,
+        amount,
+        trade_fee_bps: fees.trade_fee_bps,
+        financing_fee_bps: fees.financing_fee_bps,
+        pool_yield_bps: fees.pool_yield_bps,
+        deadline,
+    };
+    let args: Vec<Val> = (parties, terms).into_val(env);
+    // The registry index is the salt: unique per platform, so addresses never collide
+    // and anyone can recompute where escrow N lives.
+    let escrow = env
+        .deployer()
+        .with_current_contract(salt(env, index))
+        .deploy_contract(ContractExecutable::Wasm(wasm), args);
+
+    let key = DataKey::Escrow(index);
+    env.storage().persistent().set(&key, &escrow);
+    env.storage().persistent().extend_ttl(&key, BUMP_THRESHOLD, BUMP_TO);
+    let reverse = DataKey::EscrowIndex(escrow.clone());
+    env.storage().persistent().set(&reverse, &index);
+    env.storage().persistent().extend_ttl(&reverse, BUMP_THRESHOLD, BUMP_TO);
+    store.set(&DataKey::EscrowCount, &(index + 1));
+    EscrowCreated { buyer, seller, index, escrow: escrow.clone(), amount }.publish(env);
+    bump(env);
+    escrow
 }
 
 fn check_fees(env: &Env, fees: &Fees) {
