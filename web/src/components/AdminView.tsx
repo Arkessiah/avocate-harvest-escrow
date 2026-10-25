@@ -82,7 +82,7 @@ export function AdminView() {
         </p>
       )}
 
-      <section aria-label="Platform overview" className="grid gap-4 lg:grid-cols-6">
+      <section aria-label="Platform overview" className="grid grid-cols-1 gap-4 lg:grid-cols-6">
         <div className="card-highlight flex flex-col gap-6 p-6 sm:flex-row sm:items-center lg:col-span-4">
           <div className="min-w-0 flex-1">
           <h2 className="text-sm font-medium text-ink/70">Paid to farmers</h2>
@@ -139,17 +139,17 @@ function StateRings({ trades }: { trades: Trade[] }) {
     { label: "Refunded or cancelled", value: count(["Refunded", "Cancelled"]), stroke: "stroke-danger", dot: "bg-danger" },
   ];
   return (
-    <div className="flex items-center gap-4">
-      <div className="relative h-36 w-36 shrink-0">
+    <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+      <div className="relative h-28 w-28 shrink-0 sm:h-36 sm:w-36">
         <Rings parts={parts} total={trades.length} label="Trades by state" />
         <span className="absolute inset-0 flex flex-col items-center justify-center leading-none" aria-hidden>
           <span className="font-condensed text-3xl">{trades.length}</span>
           <span className="mt-1 text-xs text-ink/70">trades</span>
         </span>
       </div>
-      <dl className="space-y-1.5 text-sm">
+      <dl className="min-w-0 space-y-1.5 text-sm">
         {parts.map((p) => (
-          <div key={p.label} className="flex items-center justify-between gap-4">
+          <div key={p.label} className="flex items-center justify-between gap-3">
             <dt className="flex items-center gap-1.5 text-ink/70">
               <span className={`h-2 w-2 rounded-full ${p.dot}`} aria-hidden /> {p.label}
             </dt>
@@ -414,7 +414,27 @@ function Registry({ trades }: { trades: Trade[] }) {
           ))}
         </div>
       </div>
-      <div className="mt-4 overflow-x-auto">
+      {/* Phones get one compact row per trade; the six-column table needs a wider screen. */}
+      <ul className="mt-4 divide-y divide-ink/5 text-sm sm:hidden">
+        {shown.map((t) => (
+          <li key={t.id} className="py-2.5">
+            <div className="flex items-center justify-between gap-3">
+              <span className="flex items-center gap-2">
+                <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATE_BADGE[t.state]}`}>{t.state}</span>
+                <span className="whitespace-nowrap font-semibold">{formatUsdc(t.config.amount)}</span>
+              </span>
+              <Link href={`/buyer?trade=${t.id}`} className="whitespace-nowrap font-mono text-xs text-brand-dark hover:underline">
+                {short(t.id, 4)}
+              </Link>
+            </div>
+            <p className="mt-1 font-mono text-xs text-ink/70">
+              {short(t.config.buyer, 4)} → {short(t.config.seller, 4)}
+              {t.advance && <span className="font-sans"> · advance {formatUsdc(t.advance.principal)}</span>}
+            </p>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-4 hidden overflow-x-auto sm:block">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead>
             <tr className="text-xs uppercase tracking-wide text-ink/70">
