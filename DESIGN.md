@@ -119,7 +119,12 @@ money.
 "Built on" shows the Stellar, USDC and OpenZeppelin logos exactly as published by their
 owners (never recoloured), each with a one-line caption, plus the HackMeridian 2026 Lisbon
 logo. The footer carries the trademark and non-affiliation notices their brand policies ask
-for. An animated isometric figure of the trade flow is planned for a later pass.
+for. The hero's centrepiece is an animated isometric figure of one trade as a machine on a
+bench (`web/src/components/harvest-figure/`): the buyer's coins drop into the escrow vault,
+the pool advances part to the farmer's crate, the validator's press stamps the seal, the vault
+pays out. It loops calmly, pauses on click, stops offscreen and stands still under reduced
+motion. The landing is a bento: the figure as the large piece, the live numbers as the one
+highlighted card.
 
 ## Language
 

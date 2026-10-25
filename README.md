@@ -146,6 +146,11 @@ Current testnet deployment: [addresses](deploy/deployments/testnet.json) ·
 Before the event we tested parts of the project on Stellar testnet (trial contracts and
 isolated pieces).
 
+## Third-party code
+
+The landing page's isometric drawing kit (`web/src/components/harvest-figure/kit/`) is MIT
+licensed; its license file sits beside it.
+
 ## License
 
 [PolyForm Noncommercial 1.0.0](PolyForm%20NonCommercial%201.0.0.txt).
