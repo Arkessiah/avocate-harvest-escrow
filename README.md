@@ -35,7 +35,7 @@ the other completes it from a link or by scanning a QR code.
 
 | Fee | Default | Paid by |
 |---|---|---|
-| Trade fee | 0.1% | Buyer, on top of the price; refunded if the trade is refunded |
+| Trade fee | 1% | Buyer, on top of the price; refunded if the trade is refunded |
 | Financing fee | 0.2% of the advance | Farmer, to the platform |
 | Pool yield | 2% of the advance | Farmer, to pool depositors |
 

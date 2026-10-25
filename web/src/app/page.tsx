@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 const STEPS = [
-  ["The buyer locks the price", "The trade gets its own contract on Stellar. The buyer deposits the price in USDC plus a 0.1% fee; nobody can change the amount or the recipient afterwards."],
+  ["The buyer locks the price", "The trade gets its own contract on Stellar. The buyer deposits the price in USDC plus a 1% fee; nobody can change the amount or the recipient afterwards."],
   ["The farmer can get paid early", "While the money is locked, an onboarded farmer can ask the financing pool for up to 80% of the price. The farmer signs first and sends the request to the buyer, who completes it."],
   ["An independent validator checks the delivery", "The validator records one verdict on chain with the fingerprint of the inspection report. It can never be rewritten."],
   ["The farmer is paid in seconds", "With a conforming delivery the buyer, or a limited agent acting for them, releases the payment. The pool is repaid first if it advanced money, and the farmer gets the rest."],
