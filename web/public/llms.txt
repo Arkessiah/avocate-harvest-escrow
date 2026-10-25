@@ -1,0 +1,26 @@
+# Avocate Harvest Escrow
+
+> USDC escrow on the Stellar network for agricultural trade between a buyer and a farmer. The buyer locks the price in a per-trade smart contract, an independent validator checks the delivery, and the farmer is paid in seconds once it is confirmed. A financing pool funded by several depositors can advance up to 80% of the price to onboarded farmers. Beta on Stellar testnet with test USDC: no real money.
+
+Built by Avocate (https://avocate.io) during HackMeridian 2026 in Lisbon. Version 0.0.1.
+
+## Pages
+
+- [Home](https://avocate-harvest-escrow.vercel.app/): what the product does, how a trade runs, the anti-fraud rules and a FAQ.
+- [Overview](https://avocate-harvest-escrow.vercel.app/overview): live network status, contract addresses and current fees.
+- [Buyer](https://avocate-harvest-escrow.vercel.app/buyer): create a trade, deposit the price, confirm delivery or take a refund.
+- [Farmer](https://avocate-harvest-escrow.vercel.app/farmer): follow your trades and request an advance co-signed with the buyer.
+- [Pool](https://avocate-harvest-escrow.vercel.app/pool): deposit into the financing pool, see its value, share price and open advances.
+- [Validator](https://avocate-harvest-escrow.vercel.app/validator): record whether a delivery conforms.
+- [Agent](https://avocate-harvest-escrow.vercel.app/agent): settle a validated trade on the buyer's behalf.
+- [Admin](https://avocate-harvest-escrow.vercel.app/admin): fees for new trades, farmer onboarding and the registry of all trades.
+
+## Key facts
+
+- Fees: the buyer pays 0.1% of the price on top, refunded if the trade is refunded. On an advance, the farmer pays 2% to the pool's depositors and 0.2% to Avocate. Each trade keeps the fees it was created with.
+- A rejected delivery refunds the buyer in full and the pool's depositors share any advance loss. A financed trade that lapses at its deadline repays the pool first.
+- Contracts: Soroban (Rust). The financing pool follows the SEP-56 tokenized vault standard.
+
+## Source
+
+- [Source code and security rules](https://github.com/Arkessiah/avocate-harvest-escrow)
