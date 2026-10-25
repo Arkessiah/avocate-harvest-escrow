@@ -26,7 +26,7 @@ export const ROLES = {
     trades: true,
     label: "Agent",
     intro:
-      "Settles a trade for the buyer once the validator has confirmed delivery. It can only trigger the payout agreed when the trade was created.",
+      "Settles trades for the buyer once the validator has confirmed delivery. Before each release it pays for the validator's delivery check over x402 and compares it with the chain. It can only trigger the payout agreed when the trade was created.",
   },
   admin: {
     label: "Admin",

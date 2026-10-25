@@ -2,7 +2,9 @@ import { wrapFetchWithPaymentFromConfig, decodePaymentResponseHeader } from "@x4
 import type { PaymentRequirements } from "@x402/core/types";
 import { createEd25519Signer } from "@x402/stellar";
 import { ExactStellarScheme } from "@x402/stellar/exact/client";
+import type { Keypair } from "@stellar/stellar-sdk";
 import { listTrades } from "@/lib/registry";
+import { readTrade, type Trade } from "@/lib/trade";
 import { toHex } from "@/lib/report";
 import { formatUsdc } from "@/lib/usdc";
 import { serviceKey, submit } from "@/lib/server/service";
@@ -39,44 +41,60 @@ const onlyOurValidator = (_v: number, options: PaymentRequirements[]) =>
       BigInt(o.amount) <= MAX_CHECK_UNITS,
   );
 
-// The agent settles a validated trade only after buying the validator's delivery check
-// over x402 and finding that it matches what the chain records. Its on-chain power is
-// unchanged: it can only trigger the payout fixed when the trade was created.
-export async function runAgent(): Promise<{ ready: number; steps: AgentStep[] }> {
-  const agent = serviceKey("AGENT_SECRET");
-  const ready = (await listTrades()).filter(
-    (t) => t.state === "Funded" && t.validation?.ok === true && t.config.agent === agent.publicKey(),
-  );
-  const paidFetch = wrapFetchWithPaymentFromConfig(fetch, {
+function paidFetchFor(agent: Keypair) {
+  return wrapFetchWithPaymentFromConfig(fetch, {
     schemes: [{ network: X402_NETWORK, client: new ExactStellarScheme(createEd25519Signer(agent.secret(), X402_NETWORK)) }],
     policies: [onlyOurValidator],
   });
+}
 
-  const steps: AgentStep[] = [];
-  for (const trade of ready.slice(0, MAX_PER_RUN)) {
-    const step: AgentStep = { escrow: trade.id, amount: formatUsdc(trade.config.amount), outcome: "failed", reason: "" };
-    steps.push(step);
-    try {
-      const res = await paidFetch(`${CHECK_URL}?escrow=${trade.id}`);
-      const receipt = res.headers.get("PAYMENT-RESPONSE") ?? res.headers.get("X-PAYMENT-RESPONSE");
-      if (receipt) step.paymentTx = decodePaymentResponseHeader(receipt).transaction;
-      if (!res.ok) {
-        step.reason = `Delivery check failed (${res.status})`;
-        continue;
-      }
-      const check = (await res.json()) as { state?: string; delivery?: string; reportHash?: string | null };
-      const onChain = toHex(trade.validation!.report_hash);
-      if (check.delivery !== "conforming" || check.state !== "Funded" || check.reportHash !== onChain) {
-        step.outcome = "skipped";
-        step.reason = "The paid check does not match the chain; nothing released";
-        continue;
-      }
-      step.releaseTx = await submit(trade.id, agent, "agent_release");
-      step.outcome = "released";
-      step.reason = "Check paid and matched the chain; payment released to the farmer";
-    } catch (e) {
-      step.reason = e instanceof Error ? e.message.split("\n")[0].slice(0, 200) : "Unexpected error";
+// The agent settles a validated trade only after buying the validator's delivery check
+// over x402 and finding that it matches what the chain records. Its on-chain power is
+// unchanged: it can only trigger the payout fixed when the trade was created.
+async function settle(trade: Trade, agent: Keypair, paidFetch: typeof fetch): Promise<AgentStep> {
+  const step: AgentStep = { escrow: trade.id, amount: formatUsdc(trade.config.amount), outcome: "failed", reason: "" };
+  try {
+    const res = await paidFetch(`${CHECK_URL}?escrow=${trade.id}`);
+    const receipt = res.headers.get("PAYMENT-RESPONSE") ?? res.headers.get("X-PAYMENT-RESPONSE");
+    if (receipt) step.paymentTx = decodePaymentResponseHeader(receipt).transaction;
+    if (!res.ok) {
+      step.reason = `Delivery check failed (${res.status})`;
+      return step;
     }
+    const check = (await res.json()) as { state?: string; delivery?: string; reportHash?: string | null };
+    const onChain = trade.validation ? toHex(trade.validation.report_hash) : null;
+    if (check.delivery !== "conforming" || check.state !== "Funded" || !onChain || check.reportHash !== onChain) {
+      step.outcome = "skipped";
+      step.reason = "The paid check does not match the chain; nothing released";
+      return step;
+    }
+    step.releaseTx = await submit(trade.id, agent, "agent_release");
+    step.outcome = "released";
+    step.reason = "Check paid and matched the chain; payment released to the farmer";
+  } catch (e) {
+    step.reason = e instanceof Error ? e.message.split("\n")[0].slice(0, 200) : "Unexpected error";
   }
+  return step;
+}
+
+const isReady = (t: Trade, agent: Keypair) =>
+  t.state === "Funded" && t.validation?.ok === true && t.config.agent === agent.publicKey();
+
+export async function runAgent(): Promise<{ ready: number; steps: AgentStep[] }> {
+  const agent = serviceKey("AGENT_SECRET");
+  const ready = (await listTrades()).filter((t) => isReady(t, agent));
+  const paidFetch = paidFetchFor(agent);
+  const steps: AgentStep[] = [];
+  for (const trade of ready.slice(0, MAX_PER_RUN)) steps.push(await settle(trade, agent, paidFetch));
   return { ready: ready.length, steps };
+}
+
+// Same path for a single trade, as asked from the trade's own screen.
+export async function settleOne(escrowId: string): Promise<AgentStep> {
+  const agent = serviceKey("AGENT_SECRET");
+  const trade = await readTrade(escrowId);
+  if (!isReady(trade, agent)) {
+    return { escrow: escrowId, amount: formatUsdc(trade.config.amount), outcome: "skipped", reason: "This trade is not ready for the agent" };
+  }
+  return settle(trade, agent, paidFetchFor(agent));
 }
