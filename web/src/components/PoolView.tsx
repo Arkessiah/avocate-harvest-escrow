@@ -30,6 +30,7 @@ export function PoolView() {
   const change = pool ? (pool.sharePrice - 1) * 100 : 0;
   const base = pool && lent !== null ? pool.held + lent : 0n;
   const lentPct = base > 0n && lent !== null ? Math.round((Number(lent) / Number(base)) * 100) : 0;
+  const paused = !!pool?.loans.some((l) => Date.now() / 1000 > Number(l.deadline));
 
   return (
     <div className="grid gap-4 lg:grid-cols-6">
@@ -83,7 +84,7 @@ export function PoolView() {
       </section>
 
       <div className="lg:col-span-2">
-        <YourPosition position={position} pool={pool} onDone={refresh} />
+        <YourPosition position={position} pool={pool} paused={paused} onDone={refresh} />
       </div>
 
       <section className="card p-6 lg:col-span-6">
@@ -93,7 +94,7 @@ export function PoolView() {
         <p className="mt-1 text-sm text-ink/70">
           Money the pool has paid to farmers ahead of delivery. Each is repaid with its yield when the trade settles.
         </p>
-        <Loans loans={pool?.loans ?? null} />
+        <Loans loans={pool?.loans ?? null} onDone={refresh} />
       </section>
     </div>
   );
@@ -101,7 +102,17 @@ export function PoolView() {
 
 const amountOf = (units: bigint) => formatUsdc(units).replace(" USDC", "");
 
-function YourPosition({ position, pool, onDone }: { position: Position | null; pool: PoolState | null; onDone: () => void }) {
+function YourPosition({
+  position,
+  pool,
+  paused,
+  onDone,
+}: {
+  position: Position | null;
+  pool: PoolState | null;
+  paused: boolean;
+  onDone: () => void;
+}) {
   const { address, connect } = useWallet();
 
   if (!address) {
@@ -129,8 +140,14 @@ function YourPosition({ position, pool, onDone }: { position: Position | null; p
       <p className="mt-2 text-sm text-ink/70">{ownership.toFixed(2)}% of the pool</p>
       <Amount
         title="Deposit"
-        help={position.wallet !== null ? `Wallet balance: ${formatUsdc(position.wallet)}` : "Your wallet holds no USDC yet."}
-        max={position.wallet ?? 0n}
+        help={
+          paused
+            ? "Deposits are paused while an advance is overdue. Anyone can trigger its deadline refund below."
+            : position.wallet !== null
+              ? `Wallet balance: ${formatUsdc(position.wallet)}`
+              : "Your wallet holds no USDC yet."
+        }
+        max={paused ? 0n : position.wallet ?? 0n}
         action="Deposit"
         method="deposit"
         onDone={onDone}
@@ -209,7 +226,8 @@ function Amount({
   );
 }
 
-function Loans({ loans }: { loans: Loan[] | null }) {
+function Loans({ loans, onDone }: { loans: Loan[] | null; onDone: () => void }) {
+  const run = useTx();
   if (!loans) return <p className="mt-4 text-sm text-ink/70">Reading advances…</p>;
   if (loans.length === 0) return <p className="mt-4 text-sm text-ink/70">No advances open right now.</p>;
   const now = Date.now() / 1000;
@@ -222,7 +240,7 @@ function Loans({ loans }: { loans: Loan[] | null }) {
           <li key={l.escrow} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
             <div>
               <p className="font-semibold">
-                {formatUsdc(l.principal)} <span className="font-normal text-ink/70">→ repays {formatUsdc(l.repay)}</span>
+                {formatUsdc(l.principal)} <span className="font-normal text-ink/70">→ repays up to {formatUsdc(l.repay)}</span>
               </p>
               <p className="font-mono text-xs text-ink/70">
                 Farmer {short(l.farmer, 4)} ·{" "}
@@ -238,6 +256,23 @@ function Loans({ loans }: { loans: Loan[] | null }) {
             >
               {overdue ? "Overdue · counted as 0" : `Due ${formatDate(l.deadline)}`}
             </span>
+            {overdue && (
+              <button
+                className="btn-ghost w-full px-3 py-1.5 text-sm sm:w-auto"
+                onClick={async () => {
+                  const out = await run({
+                    title: "Deadline refund",
+                    detail: "The pool is repaid first, the buyer gets the rest",
+                    kind: "escrow",
+                    contractId: l.escrow,
+                    method: "refund",
+                  });
+                  if (out) onDone();
+                }}
+              >
+                Trigger the deadline refund
+              </button>
+            )}
           </li>
         );
       })}

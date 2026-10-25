@@ -5,7 +5,7 @@ import { useWallet } from "@/components/WalletProvider";
 import { network } from "@/lib/network";
 import { pct, short } from "@/lib/format";
 import { formatUsdc } from "@/lib/usdc";
-import { STATE_BADGE, STATE_TEXT, formatDate, type Trade } from "@/lib/trade";
+import { STATE_BADGE, STATE_TEXT, formatDate, owedNow, type Trade } from "@/lib/trade";
 import { TradeTimeline } from "@/components/TradeTimeline";
 
 export function TradeCard({ trade, children }: { trade: Trade; children?: ReactNode }) {
@@ -49,7 +49,14 @@ export function TradeCard({ trade, children }: { trade: Trade; children?: ReactN
         {advance && (
           <>
             <Row label="Advance paid to the farmer" value={formatUsdc(advance.principal)} />
-            <Row label="Owed to the pool" value={formatUsdc(advance.repay)} />
+            <Row
+              label={advance.start !== undefined ? "Owed to the pool today" : "Owed to the pool"}
+              value={
+                advance.start !== undefined && state === "Funded"
+                  ? `${formatUsdc(owedNow(trade))} (up to ${formatUsdc(advance.repay)})`
+                  : formatUsdc(advance.repay)
+              }
+            />
           </>
         )}
         {validation && <Row label="Delivery check" value={validation.ok ? "Conforming" : "Rejected"} />}

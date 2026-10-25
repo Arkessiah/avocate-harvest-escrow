@@ -108,7 +108,7 @@ export function AdvanceApproval({
           <dd className="text-lg font-semibold">{formatUsdc(request.principal)}</dd>
         </div>
         <div className="border-t border-ink/10 pt-2">
-          <dt className="label">Owed to the pool ({pct(config.pool_yield_bps)} yield)</dt>
+          <dt className="label">Owed to the pool, at most ({pct(config.pool_yield_bps)} yield)</dt>
           <dd className="text-lg font-semibold">{formatUsdc(repay)}</dd>
         </div>
       </dl>

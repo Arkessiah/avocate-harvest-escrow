@@ -12,7 +12,7 @@ import { network } from "@/lib/network";
 import { read } from "@/lib/chain";
 import { pct } from "@/lib/format";
 import { bps, formatUsdc, toInput, toUnits } from "@/lib/usdc";
-import type { Trade } from "@/lib/trade";
+import { owedNow, type Trade } from "@/lib/trade";
 import { signAdvanceRequest } from "@/lib/cosign";
 
 export function FarmerView() {
@@ -65,11 +65,11 @@ function FarmerActions({ trade, onDone }: { trade: Trade; onDone: () => void }) 
     return <p className="text-sm text-ink/70">This trade was cancelled before any deposit.</p>;
   }
   if (state === "Released") {
-    const received = config.amount - (advance ? advance.repay + financingFee : 0n);
+
     return (
       <p className="text-sm text-ink/70">
-        Paid. You received {formatUsdc(received)} at settlement
-        {advance && `, on top of the ${formatUsdc(advance.principal)} advance`}.
+        Paid. You received the price at settlement
+        {advance && `, minus the pool's repayment and the financing fee, on top of the ${formatUsdc(advance.principal)} advance`}.
       </p>
     );
   }
@@ -80,7 +80,8 @@ function FarmerActions({ trade, onDone }: { trade: Trade; onDone: () => void }) 
     return (
       <p className="text-sm text-ink/70">
         You already received an advance of {formatUsdc(advance.principal)}. At settlement the pool is repaid{" "}
-        {formatUsdc(advance.repay)} and Avocate keeps {formatUsdc(financingFee)}; the rest is paid to you.
+        {formatUsdc(owedNow(trade))} if it settles today (up to {formatUsdc(advance.repay)} at the deadline) and Avocate keeps{" "}
+        {formatUsdc(financingFee)}; the rest is paid to you.
       </p>
     );
   }
@@ -213,7 +214,7 @@ function AdvanceRequest({ trade, farmer, onDone }: { trade: Trade; farmer: strin
             <dd className="font-semibold">{formatUsdc(principal)}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-ink/70">Repaid to the pool at settlement ({pct(config.pool_yield_bps)} yield)</dt>
+            <dt className="text-ink/70">Repaid to the pool, at most ({pct(config.pool_yield_bps)} yield at the deadline)</dt>
             <dd>{formatUsdc(repay)}</dd>
           </div>
           <div className="flex justify-between">
@@ -221,10 +222,12 @@ function AdvanceRequest({ trade, farmer, onDone }: { trade: Trade; farmer: strin
             <dd>{formatUsdc(fee)}</dd>
           </div>
           <div className="mt-1 flex justify-between border-t border-ink/5 pt-1">
-            <dt className="text-ink/70">Paid to you at settlement</dt>
+            <dt className="text-ink/70">Paid to you at settlement, at least</dt>
             <dd>{formatUsdc(config.amount - repay - fee)}</dd>
           </div>
-          <p className="mt-2 text-xs text-ink/70">The repayment and the fee are taken from the price when the trade settles.</p>
+          <p className="mt-2 text-xs text-ink/70">
+            The yield runs only for the time you have the money: settle early and you pay less.
+          </p>
         </dl>
       )}
       <button className="btn-brand w-full" onClick={sign} disabled={!!problem}>

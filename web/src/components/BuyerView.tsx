@@ -14,7 +14,7 @@ import { useTrade, useTradeParam } from "@/components/useTrade";
 import { network } from "@/lib/network";
 import { read } from "@/lib/chain";
 import { bps, formatUsdc } from "@/lib/usdc";
-import { formatDate, type Trade } from "@/lib/trade";
+import { formatDate, owedNow, type Trade } from "@/lib/trade";
 
 export function BuyerView() {
   const [tradeId, setTradeId] = useTradeParam();
@@ -114,17 +114,21 @@ function BuyerActions({ trade, onDone }: { trade: Trade; onDone: () => void }) {
   }
 
   const financingFee = advance ? bps(advance.principal, config.financing_fee_bps) : 0n;
-  const toFarmer = config.amount - (advance ? advance.repay + financingFee : 0n);
+  const owed = owedNow(trade);
+  const toFarmer = config.amount - (advance ? owed + financingFee : 0n);
   const rejected = validation?.ok === false;
+  const conforming = validation?.ok === true;
   const expired = Date.now() / 1000 > Number(config.deadline);
-  const canRefund = rejected || expired;
+  // No refund once the delivery conforms: the escrow refuses it from v0.0.4, and the app
+  // does not offer it on older trades either.
+  const canRefund = rejected || (expired && !conforming);
 
   return (
     <div className="space-y-4">
       <div className="space-y-3">
         <p className="text-sm text-ink/70">
           When the goods arrive as agreed, confirm the delivery. The farmer receives {formatUsdc(toFarmer)}
-          {advance && ` (the price minus the ${formatUsdc(advance.repay)} owed to the pool and the financing fee)`}.
+          {advance && ` (the price minus the ${formatUsdc(owed)} owed to the pool today and the financing fee)`}.
         </p>
         <button
           className="btn-brand w-full"
@@ -136,7 +140,9 @@ function BuyerActions({ trade, onDone }: { trade: Trade; onDone: () => void }) {
 
       <div className="space-y-3 border-t border-ink/5 pt-4">
         <p className="text-sm text-ink/70">
-          {rejected
+          {conforming
+            ? "The validator confirmed the delivery, so there is no refund: the trade can only be paid out to the farmer."
+            : rejected
             ? "The validator rejected the delivery: you can take your full deposit back."
             : expired
               ? advance

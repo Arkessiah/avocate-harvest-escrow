@@ -12,6 +12,7 @@ const CONTRACT_ERRORS: Record<string, string[]> = {
     "AlreadyAdvanced",
     "AdvanceTooLarge",
     "NotAParty",
+    "DeliveryConforming",
   ],
   platform: ["InvalidFee", "PoolNotSet"],
   pool: [
@@ -30,6 +31,8 @@ const CONTRACT_ERRORS: Record<string, string[]> = {
     "UnknownLoan",
     "Expired",
     "InvalidFee",
+    "DepositsPaused",
+    "InvalidRepayment",
   ],
 };
 

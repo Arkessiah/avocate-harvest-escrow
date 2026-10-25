@@ -6,7 +6,7 @@ import { AgentRun } from "@/components/AgentRun";
 import { TradeWorkspace, type ActionsProps } from "@/components/TradeWorkspace";
 import { callService } from "@/lib/services";
 import { bps, formatUsdc } from "@/lib/usdc";
-import type { Trade } from "@/lib/trade";
+import { owedNow, type Trade } from "@/lib/trade";
 
 const ready = { label: "Ready to release", test: (t: Trade) => t.state === "Funded" && t.validation?.ok === true };
 
@@ -30,7 +30,7 @@ function AgentActions({ trade, onDone }: ActionsProps) {
   if (!validation) return <p className="text-sm text-ink/70">Waiting for the validator. The agent can only act after a conforming verdict.</p>;
   if (!validation.ok) return <p className="text-sm text-ink/70">The delivery was rejected, so the agent cannot pay it. The buyer can take the deposit back.</p>;
 
-  const toFarmer = config.amount - (advance ? advance.repay + bps(advance.principal, config.financing_fee_bps) : 0n);
+  const toFarmer = config.amount - (advance ? owedNow(trade) + bps(advance.principal, config.financing_fee_bps) : 0n);
 
   async function release() {
     const out = await run({

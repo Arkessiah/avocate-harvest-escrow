@@ -24,7 +24,9 @@ export interface Trade {
   config: TradeConfig;
   state: TradeState;
   validation: { ok: boolean; report_hash: Uint8Array } | null;
-  advance: { principal: bigint; repay: bigint } | null;
+  // `start` exists on trades created with escrow code from v0.0.4, which charges the yield
+  // in proportion to time; older trades owe the full `repay`.
+  advance: { principal: bigint; repay: bigint; start?: bigint } | null;
   tradeFee: bigint;
   // Escrow code older than v0.0.2 has no `cancel`; the client is built from each trade's
   // own on-chain spec, so it tells which kind this one is.
@@ -60,6 +62,17 @@ export async function readTrade(id: string, registered = false): Promise<Trade> 
     tradeFee: bps(config.amount, config.trade_fee_bps),
     canCancel: typeof (client as unknown as Record<string, unknown>).cancel === "function",
   };
+}
+
+// What the pool is owed if the trade settles now: the same pro-rata rule as the escrow.
+export function owedNow(trade: Trade, nowSeconds = Math.floor(Date.now() / 1000)): bigint {
+  const a = trade.advance;
+  if (!a) return 0n;
+  if (a.start === undefined) return a.repay;
+  const term = trade.config.deadline > a.start ? trade.config.deadline - a.start : 1n;
+  const now = BigInt(nowSeconds);
+  const elapsed = now <= a.start ? 0n : now - a.start > term ? term : now - a.start;
+  return a.principal + ((a.repay - a.principal) * elapsed) / term;
 }
 
 export const STATE_BADGE: Record<TradeState, string> = {
