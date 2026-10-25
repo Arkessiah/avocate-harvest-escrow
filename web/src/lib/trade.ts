@@ -36,8 +36,11 @@ export class NotAvocateTrade extends Error {
 
 // The platform's registry is checked first: any contract can mimic the escrow's methods,
 // and only the registry proves the terms were set by Avocate.
-export async function readTrade(id: string): Promise<Trade> {
-  if (!(await read<boolean>(network.contracts.platform, "is_escrow", { escrow: id }))) throw new NotAvocateTrade();
+// `registered` skips the registry check for ids that were just read from the registry.
+export async function readTrade(id: string, registered = false): Promise<Trade> {
+  if (!registered && !(await read<boolean>(network.contracts.platform, "is_escrow", { escrow: id }))) {
+    throw new NotAvocateTrade();
+  }
   const [config, state, validation, advance] = await Promise.all([
     read<TradeConfig>(id, "config"),
     read<unknown>(id, "state"),
