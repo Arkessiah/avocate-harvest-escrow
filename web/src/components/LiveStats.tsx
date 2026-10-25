@@ -47,7 +47,7 @@ export function LiveStats() {
           <dd className="font-semibold">{stats ? formatUsdc(stats.poolValue) : "…"}</dd>
         </div>
         <div className="flex justify-between gap-4">
-          <dt className="text-ink/70">Trade fee (buyer)</dt>
+          <dt className="text-ink/70">Harvest fee (buyer)</dt>
           <dd className="font-semibold">{stats ? pct(stats.fees.trade_fee_bps) : "…"}</dd>
         </div>
         <div className="flex justify-between gap-4">

@@ -91,7 +91,7 @@ function BuyerActions({ trade, onDone }: { trade: Trade; onDone: () => void }) {
     return (
       <div className="space-y-3">
         <p className="text-sm text-ink/70">
-          Lock {formatUsdc(total)} in the trade: the price plus the trade fee. Nobody can move it except under the
+          Lock {formatUsdc(total)} in the trade: the price plus the harvest fee. Nobody can move it except under the
           trade's rules.
         </p>
         {balance !== null && (

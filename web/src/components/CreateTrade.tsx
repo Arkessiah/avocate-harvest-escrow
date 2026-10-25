@@ -108,7 +108,7 @@ export function CreateTrade({ onCreated }: { onCreated: (id: string) => void }) 
               <dd>{formatUsdc(amount)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-ink/70">Trade fee ({pct(fees.trade_fee_bps)})</dt>
+              <dt className="text-ink/70">Harvest fee ({pct(fees.trade_fee_bps)})</dt>
               <dd>{formatUsdc(fee)}</dd>
             </div>
             <div className="mt-1 flex justify-between border-t border-ink/5 pt-1 font-semibold">

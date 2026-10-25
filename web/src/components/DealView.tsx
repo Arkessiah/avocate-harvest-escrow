@@ -133,7 +133,7 @@ export function DealView() {
           <dd>{formatDate(deal.deadline)}</dd>
         </div>
         <div className="border-t border-ink/10 pt-2">
-          <dt className="label">Trade fee</dt>
+          <dt className="label">Harvest fee</dt>
           <dd>{fees && fee !== null ? `${formatUsdc(fee)} (${pct(fees.trade_fee_bps)}, paid by the buyer)` : "…"}</dd>
         </div>
       </dl>

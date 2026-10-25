@@ -23,7 +23,7 @@ export const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "How does an advance work, and what does it cost?",
-    a: "While a trade is funded, a farmer onboarded by Avocate can ask a financing pool for up to 80% of the price. The farmer signs first and the buyer completes the request. When the trade settles, the pool is repaid the advance plus 2% for its depositors, and Avocate charges 0.2% of the advance.",
+    a: "While a trade is funded, a farmer onboarded by Avocate can ask a financing pool for up to 80% of the price. The farmer signs first and the buyer completes the request. When the trade settles, the pool is repaid the advance plus 2% for its depositors, and Avocate charges 0.5% of the advance.",
   },
   {
     q: "What stops a buyer and a farmer from teaming up against the pool?",

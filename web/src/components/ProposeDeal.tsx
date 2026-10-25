@@ -138,7 +138,7 @@ export function ProposeDeal({ side }: { side: "buyer" | "farmer" }) {
         </div>
         {amount && fee !== null && fees && (
           <p className="text-xs text-ink/70">
-            The buyer will deposit {formatUsdc(amount + fee)}: the price plus the {pct(fees.trade_fee_bps)} trade fee.
+            The buyer will deposit {formatUsdc(amount + fee)}: the price plus the {pct(fees.trade_fee_bps)} harvest fee.
           </p>
         )}
       </div>

@@ -37,7 +37,7 @@ export function StatusView() {
           <p className="figure-xl mt-2">{trades ?? "…"}</p>
           <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-2 text-sm">
             <div>
-              <dt className="text-ink/70">Trade fee (buyer)</dt>
+              <dt className="text-ink/70">Harvest fee (buyer)</dt>
               <dd className="font-semibold">{fees ? pct(fees.trade_fee_bps) : "…"}</dd>
             </div>
             <div>

@@ -35,8 +35,8 @@ the other completes it from a link or by scanning a QR code.
 
 | Fee | Default | Paid by |
 |---|---|---|
-| Trade fee | 1% | Buyer, on top of the price; refunded if the trade is refunded |
-| Financing fee | 0.2% of the advance | Farmer, to the platform |
+| Harvest fee | 1% | Buyer, on top of the price; refunded if the trade is refunded |
+| Financing fee | 0.5% of the advance | Farmer, to the platform |
 | Pool yield | 2% of the advance | Farmer, to pool depositors |
 
 A fee change only affects trades created afterwards: nobody sees the terms of an agreed trade change.

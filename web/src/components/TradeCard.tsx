@@ -43,7 +43,7 @@ export function TradeCard({ trade, children }: { trade: Trade; children?: ReactN
       </div>
 
       <dl className="grid gap-x-6 gap-y-3 border-t border-ink/5 px-6 py-5 text-sm sm:grid-cols-3">
-        <Row label={`Trade fee (${pct(config.trade_fee_bps)})`} value={formatUsdc(trade.tradeFee)} />
+        <Row label={`Harvest fee (${pct(config.trade_fee_bps)})`} value={formatUsdc(trade.tradeFee)} />
         <Row label="Buyer" value={short(config.buyer, 4) + you(config.buyer)} mono />
         <Row label="Farmer" value={short(config.seller, 4) + you(config.seller)} mono />
         <Row label="Deadline" value={formatDate(config.deadline)} />

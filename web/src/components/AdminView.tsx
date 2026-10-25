@@ -164,7 +164,7 @@ function StateRings({ trades }: { trades: Trade[] }) {
 const amountOf = (units: bigint) => formatUsdc(units).replace(" USDC", "");
 
 const FEE_FIELDS: { key: keyof Fees; label: string; who: string }[] = [
-  { key: "trade_fee_bps", label: "Trade fee", who: "Paid by the buyer on top of the price; refunded if the trade is refunded." },
+  { key: "trade_fee_bps", label: "Harvest fee", who: "Paid by the buyer on top of the price; refunded if the trade is refunded." },
   { key: "financing_fee_bps", label: "Financing fee", who: "Paid by the farmer to Avocate on each advance." },
   { key: "pool_yield_bps", label: "Pool yield", who: "Paid by the farmer to the pool's depositors on each advance." },
 ];
