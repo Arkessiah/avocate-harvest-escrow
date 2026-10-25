@@ -26,7 +26,7 @@ export interface Trade {
   validation: { ok: boolean; report_hash: Uint8Array } | null;
   advance: { principal: bigint; repay: bigint } | null;
   tradeFee: bigint;
-  // Escrow code older than v0.1.0 has no `cancel`; the client is built from each trade's
+  // Escrow code older than v0.0.2 has no `cancel`; the client is built from each trade's
   // own on-chain spec, so it tells which kind this one is.
   canCancel: boolean;
 }

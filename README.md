@@ -2,7 +2,7 @@
 
 [![contracts](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml)
 
-**Version 0.1.0** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
+**Version 0.0.2** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
 
 **Live app:** https://avocate-harvest-escrow.vercel.app
 
@@ -50,7 +50,7 @@ that is built.
 - The agent can only trigger the payout already agreed, and only after a conforming validation. It cannot choose recipients or amounts.
 - A refund before the deadline needs a non-conforming validation from the independent validator.
 - State changes before any token moves, so a trade can never be settled twice.
-- Before any money is deposited, the buyer or the farmer can cancel the trade (state `Cancelled`). Once funded it can only end through settlement or a refund, so no one can walk away with the other party's money. Trades created before this rule (escrow code earlier than v0.1.0) cannot be cancelled; the pool refuses to finance a cancelled trade.
+- Before any money is deposited, the buyer or the farmer can cancel the trade (state `Cancelled`). Once funded it can only end through settlement or a refund, so no one can walk away with the other party's money. Trades created before this rule (escrow code earlier than v0.0.2) cannot be cancelled; the pool refuses to finance a cancelled trade.
 
 **Platform**
 - Fee schedule, service accounts and escrow code are admin-only. Changes apply to new trades only; open trades keep the terms they were created with.
@@ -128,7 +128,7 @@ Current testnet deployment: [addresses](deploy/deployments/testnet.json) ·
 
 ## Version history
 
-- **0.1.0**: trades agreed on the spot, signed by buyer and farmer from a link or a QR code (`create_trade`, platform upgraded in place); either party can cancel a trade before it is funded (new escrow code for new trades).
+- **0.0.2**: trades agreed on the spot, signed by buyer and farmer from a link or a QR code (`create_trade`, platform upgraded in place); either party can cancel a trade before it is funded (new escrow code for new trades).
 - **0.0.1**: escrow, platform and financing pool on testnet; web app with buyer, farmer, pool, validator, agent and admin screens.
 
 ## Prior work
