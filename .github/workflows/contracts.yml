@@ -1,0 +1,39 @@
+name: contracts
+
+on:
+  push:
+    branches: [main]
+    paths: ["contract/**", ".github/workflows/contracts.yml"]
+  pull_request:
+    paths: ["contract/**", ".github/workflows/contracts.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contract
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Rust toolchain
+        run: |
+          rustup update stable
+          rustup default stable
+          rustup target add wasm32v1-none
+
+      # Pinned by SHA, so the action cannot infer the version from the ref: pass it explicitly.
+      - uses: stellar/stellar-cli@c0f4d0da891bbf214c08b8c5035ae6db80e9a3bd # v28.1.0
+        with:
+          version: 28.1.0
+
+      # soroban-sdk refuses plain `cargo build` for Wasm, and the platform tests deploy the
+      # real escrow Wasm, so the contracts are built with the CLI before testing.
+      - name: Build contracts
+        run: stellar contract build
+
+      - name: Test
+        run: cargo test --locked

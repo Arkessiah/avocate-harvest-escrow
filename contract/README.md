@@ -1,5 +1,7 @@
 # Contracts
 
+[![contracts](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml)
+
 Soroban workspace (`soroban-sdk` 29, target `wasm32v1-none`).
 
 | Contract | Purpose |
@@ -21,6 +23,8 @@ Fee schedule (basis points, configurable by the platform admin):
 stellar contract build    # platform tests deploy the real escrow Wasm, so build first
 cargo test
 ```
+
+CI runs the same two steps on every push that touches `contract/`.
 
 ## Testnet
 
