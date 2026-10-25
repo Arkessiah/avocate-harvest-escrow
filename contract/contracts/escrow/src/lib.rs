@@ -25,6 +25,8 @@ pub enum Error {
     AdvanceTooLarge = 9,
     /// Only the buyer or the farmer of the trade may do this.
     NotAParty = 10,
+    /// The delivery was validated as conforming: the trade can only be paid out now.
+    DeliveryConforming = 11,
 }
 
 #[contracttype]
@@ -98,18 +100,21 @@ enum DataKey {
     Advance,
 }
 
-/// Money the pool put in the seller's hands before delivery, and what it is owed back.
+/// Money the pool put in the seller's hands before delivery. `repay` is the most it can be
+/// owed (principal plus the full yield, reached at the deadline); the yield actually paid
+/// grows with the time the farmer had the money, from `start`.
 #[contracttype]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Advance {
     pub principal: i128,
     pub repay: i128,
+    pub start: u64,
 }
 
 // Callbacks the escrow makes into the financing pool once a financed trade ends.
 #[contractclient(name = "PoolClient")]
 pub trait PoolCallbacks {
-    fn on_repaid(env: Env, escrow: Address);
+    fn on_repaid(env: Env, escrow: Address, amount: i128);
     fn on_written_off(env: Env, escrow: Address);
 }
 
@@ -275,7 +280,8 @@ impl Escrow {
         config.pool.require_auth();
         config.buyer.require_auth();
 
-        env.storage().instance().set(&DataKey::Advance, &Advance { principal, repay });
+        let start = env.ledger().timestamp();
+        env.storage().instance().set(&DataKey::Advance, &Advance { principal, repay, start });
         Advanced { seller: config.seller, principal, repay }.publish(&env);
         bump(&env);
         Ok(())
@@ -297,6 +303,12 @@ impl Escrow {
 
         let validation = Validation { ok, report_hash: report_hash.clone() };
         env.storage().instance().set(&DataKey::Validation, &validation);
+        // A rejected delivery means the advance will not come back. The pool books the loss
+        // now, not when the buyer gets round to the refund: otherwise depositors who notice
+        // first could leave at a price that still counts the lost money.
+        if !ok && advance(&env).is_some() {
+            PoolClient::new(&env, &config.pool).on_written_off(&env.current_contract_address());
+        }
         Validated { validator: config.validator, ok, report_hash }.publish(&env);
         bump(&env);
         Ok(())
@@ -318,35 +330,43 @@ impl Escrow {
     }
 
     /// The buyer recovers the whole deposit, fee included, once the deadline passes or as
-    /// soon as the validator rejects the delivery: no delivery, no service charged.
+    /// soon as the validator rejects the delivery: no delivery, no service charged. After a
+    /// conforming validation there is no refund: the goods were delivered, so the trade can
+    /// only be paid out to the farmer.
     ///
     /// On a financed trade the two exits differ on purpose. A rejection by the independent
-    /// validator is a real dispute: the buyer gets everything and the pool books the loss,
-    /// shared by all depositors. A plain deadline expiry repays the pool first, because
-    /// otherwise a buyer and a farmer could agree to let the trade lapse and keep the
-    /// advance between them.
+    /// validator is a real dispute: the buyer gets everything and the pool has already
+    /// booked the loss, shared by all depositors. A plain deadline expiry repays the pool
+    /// first, because otherwise a buyer and a farmer could agree to let the trade lapse and
+    /// keep the advance between them.
+    ///
+    /// A rejection refund needs the buyer. A deadline refund can be triggered by anyone,
+    /// since the money still goes only to the pool and the buyer: an expired trade must
+    /// not hold the pool's money hostage while the buyer stays away.
     pub fn refund(env: Env) -> Result<(), Error> {
         let config = config(&env);
         require_state(&env, State::Funded)?;
-        let rejected = matches!(validation(&env), Some(v) if !v.ok);
+        let rejected = match validation(&env) {
+            Some(v) if v.ok => return Err(Error::DeliveryConforming),
+            Some(_) => true,
+            None => false,
+        };
         if !rejected && env.ledger().timestamp() <= config.deadline {
             return Err(Error::NotExpired);
         }
-        config.buyer.require_auth();
+        if rejected {
+            config.buyer.require_auth();
+        }
 
         set_state(&env, State::Refunded);
         let client = token::TokenClient::new(&env, &config.token);
         let escrow = env.current_contract_address();
         let mut to_buyer = config.amount + trade_fee(&config);
-        if let Some(a) = advance(&env) {
-            let pool = PoolClient::new(&env, &config.pool);
-            if rejected {
-                pool.on_written_off(&escrow);
-            } else {
-                client.transfer(&escrow, &config.pool, &a.repay);
-                pool.on_repaid(&escrow);
-                to_buyer -= a.repay;
-            }
+        if let (Some(a), false) = (advance(&env), rejected) {
+            let owed = owed(&env, &config, &a);
+            client.transfer(&escrow, &config.pool, &owed);
+            PoolClient::new(&env, &config.pool).on_repaid(&escrow, &owed);
+            to_buyer -= owed;
         }
         client.transfer(&escrow, &config.buyer, &to_buyer);
         Refunded { buyer: config.buyer, amount: to_buyer }.publish(&env);
@@ -405,9 +425,10 @@ fn settle(env: &Env, config: &Config, by: &Address) {
     let mut fee = trade_fee(config);
     if let Some(a) = advance(env) {
         let financing_fee = bps(a.principal, config.financing_fee_bps);
-        client.transfer(&escrow, &config.pool, &a.repay);
-        PoolClient::new(env, &config.pool).on_repaid(&escrow);
-        to_seller -= a.repay + financing_fee;
+        let owed = owed(env, config, &a);
+        client.transfer(&escrow, &config.pool, &owed);
+        PoolClient::new(env, &config.pool).on_repaid(&escrow, &owed);
+        to_seller -= owed + financing_fee;
         fee += financing_fee;
     }
     client.transfer(&escrow, &config.seller, &to_seller);
@@ -417,6 +438,15 @@ fn settle(env: &Env, config: &Config, by: &Address) {
     Released { seller: config.seller.clone(), by: by.clone(), amount: to_seller, fee }
         .publish(env);
     bump(env);
+}
+
+// What the pool is owed today: the principal plus the yield for the time the farmer has
+// had the money, at the same linear rate the pool uses to value the loan, so a repayment
+// never makes the share price jump. At or after the deadline it is the full `repay`.
+fn owed(env: &Env, config: &Config, a: &Advance) -> i128 {
+    let term = config.deadline.saturating_sub(a.start).max(1);
+    let elapsed = env.ledger().timestamp().saturating_sub(a.start).min(term);
+    a.principal + (a.repay - a.principal) * i128::from(elapsed) / i128::from(term)
 }
 
 // Rounds down: on tiny amounts the platform gives up the fraction rather than overcharging.

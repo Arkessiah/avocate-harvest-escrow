@@ -301,7 +301,41 @@ fn a_positive_validation_does_not_unlock_an_early_refund() {
     let s = Setup::new(FEE_BPS);
     s.client().fund();
     s.client().validate(&true, &s.report());
-    assert_eq!(s.client().try_refund(), Err(Ok(Error::NotExpired)));
+    assert_eq!(s.client().try_refund(), Err(Ok(Error::DeliveryConforming)));
+}
+
+#[test]
+fn no_refund_after_the_deadline_once_delivery_conforms() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    s.client().validate(&true, &s.report());
+    s.env.ledger().set_timestamp(DEADLINE + 1);
+    assert_eq!(s.client().try_refund(), Err(Ok(Error::DeliveryConforming)));
+    // The trade can still be paid out to the farmer.
+    s.client().agent_release();
+    assert_eq!(s.client().state(), State::Released);
+    assert_eq!(s.balance(&s.seller), AMOUNT);
+}
+
+#[test]
+fn anyone_can_trigger_a_deadline_refund_and_the_money_goes_to_the_buyer() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    s.env.ledger().set_timestamp(DEADLINE + 1);
+    s.env.set_auths(&[]);
+    s.client().refund();
+    assert_eq!(s.client().state(), State::Refunded);
+    assert_eq!(s.balance(&s.buyer), 5_000 * USDC);
+}
+
+#[test]
+#[should_panic(expected = "Error(Auth, InvalidAction)")]
+fn a_rejection_refund_still_needs_the_buyer() {
+    let s = Setup::new(FEE_BPS);
+    s.client().fund();
+    s.client().validate(&false, &s.report());
+    s.env.set_auths(&[]);
+    s.client().refund();
 }
 
 #[test]
