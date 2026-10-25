@@ -29,7 +29,7 @@ export function StatusView() {
 
   return (
     <AppShell>
-      <h1 className="text-2xl font-semibold tracking-tight">Farmers get paid in seconds once delivery is confirmed.</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Farmers paid in seconds. Buyers pay only for what arrives.</h1>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-6">
         <section className="card-highlight p-6 lg:col-span-3">

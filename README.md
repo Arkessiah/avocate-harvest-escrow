@@ -1,5 +1,7 @@
 # Avocate Harvest Escrow
 
+**Farmers paid in seconds. Buyers pay only for what arrives.**
+
 [![contracts](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml) [![web](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/web.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/web.yml)
 
 **Version 0.0.4** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)

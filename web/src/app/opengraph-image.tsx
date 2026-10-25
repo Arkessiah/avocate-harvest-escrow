@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Avocate Harvest Escrow: farmers paid in seconds when the harvest arrives";
+export const alt = "Avocate Harvest Escrow: farmers paid in seconds. Buyers pay only for what arrives.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -25,7 +25,7 @@ export default function OpengraphImage() {
           AVOCATE<span style={{ color: "#007A4D", fontWeight: 400, marginLeft: 14, letterSpacing: 0 }}>Harvest Escrow</span>
         </div>
         <div style={{ display: "flex", fontSize: 72, fontWeight: 700, lineHeight: 1.1, maxWidth: 940 }}>
-          Farmers paid in seconds when the harvest arrives.
+          Farmers paid in seconds. Buyers pay only for what arrives.
         </div>
         <div style={{ display: "flex", fontSize: 28, color: "#0B1F17", opacity: 0.75 }}>
           USDC escrow on Stellar · advances from a financing pool · testnet beta

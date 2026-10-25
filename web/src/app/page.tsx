@@ -71,14 +71,14 @@ export default function Landing() {
         Beta on the Stellar test network. Test USDC only: no real money moves on this site.
       </p>
 
-      <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 pt-8">
-        <Link href="/" className="flex items-baseline gap-2" aria-label="Avocate Harvest Escrow, home">
-          <span className="text-xl font-bold tracking-wide text-ink sm:text-2xl">AVOCATE</span>
-          <span className="whitespace-nowrap font-condensed text-[1.4rem] font-light leading-none text-brand-dark sm:text-[1.7rem]">
+      <header className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 pt-8">
+        <Link href="/" className="flex min-w-0 items-baseline gap-2" aria-label="Avocate Harvest Escrow, home">
+          <span className="text-lg font-bold tracking-wide text-ink sm:text-2xl">AVOCATE</span>
+          <span className="whitespace-nowrap font-condensed text-[1.2rem] font-light leading-none text-brand-dark sm:text-[1.7rem]">
             Harvest Escrow
           </span>
         </Link>
-        <Link href="/overview" className="btn-brand shrink-0 whitespace-nowrap">
+        <Link href="/overview" className="btn-brand shrink-0 whitespace-nowrap px-3 py-2 text-sm sm:px-4 sm:py-2.5 sm:text-base">
           Open app
         </Link>
       </header>
@@ -86,7 +86,7 @@ export default function Landing() {
       <main className="mx-auto max-w-6xl px-4 pb-16">
         <section className="max-w-3xl pt-12">
           <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
-            Farmers paid in seconds when the harvest arrives.
+            Farmers paid in seconds. Buyers pay only for what arrives.
           </h1>
           <p className="mt-5 text-lg text-ink/70">
             The buyer locks the price in USDC on Stellar. An independent validator checks the delivery, and the money
