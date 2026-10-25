@@ -1,7 +1,7 @@
 #![no_std]
 use soroban_sdk::{
-    contract, contracterror, contractevent, contractimpl, contracttype, panic_with_error, token,
-    Address, BytesN, Env,
+    contract, contractclient, contracterror, contractevent, contractimpl, contracttype,
+    panic_with_error, token, Address, BytesN, Env,
 };
 
 const DAY_IN_LEDGERS: u32 = 17_280;
@@ -20,6 +20,9 @@ pub enum Error {
     InvalidDeadline = 5,
     AlreadyValidated = 6,
     NotValidated = 7,
+    AlreadyAdvanced = 8,
+    /// Repaying the pool plus the financing fee must fit inside the price.
+    AdvanceTooLarge = 9,
 }
 
 #[contracttype]
@@ -88,6 +91,22 @@ enum DataKey {
     Config,
     State,
     Validation,
+    Advance,
+}
+
+/// Money the pool put in the seller's hands before delivery, and what it is owed back.
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Advance {
+    pub principal: i128,
+    pub repay: i128,
+}
+
+// Callbacks the escrow makes into the financing pool once a financed trade ends.
+#[contractclient(name = "PoolClient")]
+pub trait PoolCallbacks {
+    fn on_repaid(env: Env, escrow: Address);
+    fn on_written_off(env: Env, escrow: Address);
 }
 
 #[contracttype]
@@ -114,6 +133,14 @@ pub struct Released {
     pub by: Address,
     pub amount: i128,
     pub fee: i128,
+}
+
+#[contractevent]
+pub struct Advanced {
+    #[topic]
+    pub seller: Address,
+    pub principal: i128,
+    pub repay: i128,
 }
 
 #[contractevent]
@@ -195,6 +222,44 @@ impl Escrow {
         Ok(())
     }
 
+    /// Records an advance the pool has just paid to the seller. Only the trade's pool can
+    /// call it, and the buyer co-signs: by signing they accept that, if the trade is
+    /// refunded on the deadline, the pool is repaid from their deposit first. The amount
+    /// owed is computed here from the snapshotted yield, never taken from the caller.
+    pub fn register_advance(env: Env, principal: i128) -> Result<(), Error> {
+        let config = config(&env);
+        require_state(&env, State::Funded)?;
+        if advance(&env).is_some() {
+            return Err(Error::AlreadyAdvanced);
+        }
+        // Once there is a verdict the outcome is decided; financing it then would only
+        // serve to extract money from a trade that is about to be refunded.
+        if validation(&env).is_some() {
+            return Err(Error::InvalidState);
+        }
+        if env.ledger().timestamp() >= config.deadline {
+            return Err(Error::InvalidDeadline);
+        }
+        if principal <= 0 {
+            return Err(Error::InvalidAmount);
+        }
+        let repay = principal + bps(principal, config.pool_yield_bps);
+        if repay + bps(principal, config.financing_fee_bps) > config.amount {
+            return Err(Error::AdvanceTooLarge);
+        }
+        config.pool.require_auth();
+        config.buyer.require_auth();
+
+        env.storage().instance().set(&DataKey::Advance, &Advance { principal, repay });
+        Advanced { seller: config.seller, principal, repay }.publish(&env);
+        bump(&env);
+        Ok(())
+    }
+
+    pub fn advance(env: Env) -> Option<Advance> {
+        advance(&env)
+    }
+
     /// The validator attests the delivery. Allowed once: a verdict that could be rewritten
     /// would let a negative attestation be swapped in after the fact to unlock a refund.
     pub fn validate(env: Env, ok: bool, report_hash: BytesN<32>) -> Result<(), Error> {
@@ -229,6 +294,12 @@ impl Escrow {
 
     /// The buyer recovers the whole deposit, fee included, once the deadline passes or as
     /// soon as the validator rejects the delivery: no delivery, no service charged.
+    ///
+    /// On a financed trade the two exits differ on purpose. A rejection by the independent
+    /// validator is a real dispute: the buyer gets everything and the pool books the loss,
+    /// shared by all depositors. A plain deadline expiry repays the pool first, because
+    /// otherwise a buyer and a farmer could agree to let the trade lapse and keep the
+    /// advance between them.
     pub fn refund(env: Env) -> Result<(), Error> {
         let config = config(&env);
         require_state(&env, State::Funded)?;
@@ -238,14 +309,22 @@ impl Escrow {
         }
         config.buyer.require_auth();
 
-        let total = config.amount + trade_fee(&config);
         set_state(&env, State::Refunded);
-        token::TokenClient::new(&env, &config.token).transfer(
-            &env.current_contract_address(),
-            &config.buyer,
-            &total,
-        );
-        Refunded { buyer: config.buyer, amount: total }.publish(&env);
+        let client = token::TokenClient::new(&env, &config.token);
+        let escrow = env.current_contract_address();
+        let mut to_buyer = config.amount + trade_fee(&config);
+        if let Some(a) = advance(&env) {
+            let pool = PoolClient::new(&env, &config.pool);
+            if rejected {
+                pool.on_written_off(&escrow);
+            } else {
+                client.transfer(&escrow, &config.pool, &a.repay);
+                pool.on_repaid(&escrow);
+                to_buyer -= a.repay;
+            }
+        }
+        client.transfer(&escrow, &config.buyer, &to_buyer);
+        Refunded { buyer: config.buyer, amount: to_buyer }.publish(&env);
         bump(&env);
         Ok(())
     }
@@ -261,6 +340,10 @@ impl Escrow {
     pub fn validation(env: Env) -> Option<Validation> {
         validation(&env)
     }
+}
+
+fn advance(env: &Env) -> Option<Advance> {
+    env.storage().instance().get(&DataKey::Advance)
 }
 
 fn validation(env: &Env) -> Option<Validation> {
@@ -287,23 +370,37 @@ fn set_state(env: &Env, state: State) {
 
 // State moves before any token transfer, so a failing transfer reverts the whole call and
 // the escrow can never be settled twice.
+// On a financed trade the pool is repaid first, then the platform takes the financing fee,
+// and the seller receives what is left of the price.
 fn settle(env: &Env, config: &Config, by: &Address) {
     set_state(env, State::Released);
-    let fee = trade_fee(config);
     let client = token::TokenClient::new(env, &config.token);
     let escrow = env.current_contract_address();
-    client.transfer(&escrow, &config.seller, &config.amount);
+    let mut to_seller = config.amount;
+    let mut fee = trade_fee(config);
+    if let Some(a) = advance(env) {
+        let financing_fee = bps(a.principal, config.financing_fee_bps);
+        client.transfer(&escrow, &config.pool, &a.repay);
+        PoolClient::new(env, &config.pool).on_repaid(&escrow);
+        to_seller -= a.repay + financing_fee;
+        fee += financing_fee;
+    }
+    client.transfer(&escrow, &config.seller, &to_seller);
     if fee > 0 {
         client.transfer(&escrow, &config.platform, &fee);
     }
-    Released { seller: config.seller.clone(), by: by.clone(), amount: config.amount, fee }
+    Released { seller: config.seller.clone(), by: by.clone(), amount: to_seller, fee }
         .publish(env);
     bump(env);
 }
 
 // Rounds down: on tiny amounts the platform gives up the fraction rather than overcharging.
 fn trade_fee(config: &Config) -> i128 {
-    config.amount * i128::from(config.trade_fee_bps) / BPS_DENOMINATOR
+    bps(config.amount, config.trade_fee_bps)
+}
+
+fn bps(amount: i128, rate_bps: u32) -> i128 {
+    amount * i128::from(rate_bps) / BPS_DENOMINATOR
 }
 
 // A trade can sit funded for weeks; without extending the instance TTL the escrow (and the

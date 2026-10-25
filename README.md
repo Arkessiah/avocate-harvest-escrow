@@ -59,6 +59,17 @@ that is built.
 - Shares are not transferable and there are no allowances: only the owner can deposit their funds or redeem their shares.
 - Only idle cash can be withdrawn; money lent to farmers stays in the pool until it is repaid.
 
+**Financing (advances to farmers)**
+- Only genuine Avocate trades can be financed: the pool checks the platform registry, that the escrow names this pool, that it is funded and still within its deadline.
+- Only farmers onboarded by the admin get advances, up to **80% of the price** and up to a per-farmer exposure cap. One advance per trade, and none once a verdict exists.
+- Both the farmer and the buyer sign the advance. By signing, the buyer accepts that a deadline refund repays the pool first.
+- The amount owed (advance + 2%) is computed by the escrow from the terms it snapshotted at creation, never taken from the caller.
+- **Deadline refund on a financed trade:** the pool is repaid first and the buyer gets the rest. A buyer and a farmer who agree to let the trade lapse end up exactly where they started minus the yield: colluding gains nothing.
+- **Rejected delivery (independent validator):** the buyer gets the whole deposit back and the advance is written off. The loss is shared by all depositors in proportion to their shares.
+- Yield accrues linearly over the loan term, so nobody can deposit just before a repayment, take the yield and leave.
+- A loan past its deadline counts as zero in the pool value until it is repaid, so a depositor who sees a loss coming cannot exit at a price that still includes it.
+- The pool only accepts repayment and loss notices from escrows it actually lent to.
+
 ## Status
 
 | Piece | State |
@@ -66,7 +77,8 @@ that is built.
 | Trade escrow (fund, confirm, refund, validation, agent release) | Built, tested, deployed on testnet |
 | Platform (fees, escrow factory, registry, upgrade) | Built, tested, deployed on testnet |
 | Financing pool: deposits and withdrawals (SEP-56) | Built and tested |
-| Financing pool: advances to farmers, repayment, losses | In progress |
+| Financing pool: advances to farmers, repayment, losses | Built and tested |
+| Pool and financing on testnet | In progress |
 | Web app | Planned |
 
 Contracts, build instructions and testnet addresses: [`contract/`](contract/README.md).
