@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { StrKey } from "@stellar/stellar-sdk";
 import { useWallet } from "@/components/WalletProvider";
 import { useTx } from "@/components/TxProvider";
-import { QrCode } from "@/components/QrCode";
+import { ShareLink } from "@/components/ShareLink";
+import { ScanButton } from "@/components/QrScanner";
 import { network } from "@/lib/network";
 import { read, type Fees } from "@/lib/chain";
 import { pct } from "@/lib/format";
@@ -26,7 +27,6 @@ export function ProposeDeal({ side }: { side: "buyer" | "farmer" }) {
   const [deadline, setDeadline] = useState(() => isoDay(Date.now() + 30 * DAY));
   const [link, setLink] = useState<string | null>(null);
   const [validUntil, setValidUntil] = useState<Date | null>(null);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     read<Fees>(network.contracts.platform, "fees").then(setFees, () => setFees(null));
@@ -62,7 +62,6 @@ export function ProposeDeal({ side }: { side: "buyer" | "farmer" }) {
     if (out && typeof out.result === "string") {
       setLink(`${window.location.origin}/deal#d=${out.result}`);
       setValidUntil(new Date(Date.now() + 3600_000));
-      setCopied(false);
     }
   }
 
@@ -72,17 +71,16 @@ export function ProposeDeal({ side }: { side: "buyer" | "farmer" }) {
         <p className="label">Step 1 of 2 done</p>
         <h2 className="text-lg font-semibold">Show this to the {other}</h2>
         <p className="mt-1 text-sm text-ink/70">
-          They scan the code with their phone camera, or open the link, review the terms and sign. The trade is created at
+          They scan the code with their phone camera, or open the link you send them, review the terms and sign. The trade is created at
           that moment. Valid until {validUntil?.toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" })}.
         </p>
         <div className="mt-4">
-          <QrCode value={link} label={`QR code with the trade proposal for the ${other}`} />
-        </div>
-        <div className="mt-4 flex gap-2">
-          <input className="input font-mono text-xs" readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Proposal link" />
-          <button className="btn-brand shrink-0" onClick={() => navigator.clipboard.writeText(link).then(() => setCopied(true))}>
-            {copied ? "Copied" : "Copy link"}
-          </button>
+          <ShareLink
+            url={link}
+            subject="Trade proposal on Avocate"
+            message={`Review and sign the trade I proposed on Avocate (valid for one hour):`}
+            qrLabel={`QR code with the trade proposal for the ${other}`}
+          />
         </div>
         <button className="mt-3 text-sm text-brand-dark hover:underline" onClick={() => setLink(null)}>
           Propose another trade
@@ -105,14 +103,17 @@ export function ProposeDeal({ side }: { side: "buyer" | "farmer" }) {
           <label className="label" htmlFor={`deal-${side}-other`}>
             The {other}'s address
           </label>
-          <input
-            id={`deal-${side}-other`}
-            className="input font-mono"
-            placeholder="G…"
-            value={counterparty}
-            onChange={(e) => setCounterparty(e.target.value)}
-            spellCheck={false}
-          />
+          <div className="flex gap-2">
+            <input
+              id={`deal-${side}-other`}
+              className="input font-mono"
+              placeholder="G…"
+              value={counterparty}
+              onChange={(e) => setCounterparty(e.target.value)}
+              spellCheck={false}
+            />
+            <ScanButton onAddress={setCounterparty} />
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>

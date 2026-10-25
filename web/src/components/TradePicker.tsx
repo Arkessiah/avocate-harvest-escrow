@@ -116,7 +116,7 @@ export function TradePicker({
       )}
 
       <details className="mt-3 text-sm">
-        <summary className="cursor-pointer text-ink/70 hover:text-ink">Open a trade by its address</summary>
+        <summary className="cursor-pointer text-ink/70 hover:text-ink">Open a trade by its address or QR code</summary>
         <div className="mt-2">
           <TradeLoader current={current} onLoad={onSelect} />
         </div>

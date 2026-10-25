@@ -6,6 +6,7 @@ import { useTx } from "@/components/TxProvider";
 import { TradeCard } from "@/components/TradeCard";
 import { TradePicker } from "@/components/TradePicker";
 import { ProposeDeal } from "@/components/ProposeDeal";
+import { ShareLink } from "@/components/ShareLink";
 import { CancelTrade } from "@/components/CancelTrade";
 import { useTrade, useTradeParam } from "@/components/useTrade";
 import { network } from "@/lib/network";
@@ -28,6 +29,13 @@ export function FarmerView() {
       <div className="order-1 lg:order-none lg:col-span-3">
         <TradePicker current={tradeId} onSelect={setTradeId} party="seller" version={version} />
         {error && <p className="card p-6 text-sm text-danger">{error}</p>}
+        {!tradeId && !error && (
+          <p className="card p-6 text-sm text-ink/70">
+            Pick one of your trades. Once the buyer has deposited the payment (Funded) and before the delivery is
+            checked, you can ask the financing pool for an advance of up to {pct(network.maxAdvanceBps)} of the price from
+            that trade.
+          </p>
+        )}
         {loading && !trade && <p className="card p-6 text-sm text-ink/70">Reading the trade from the network…</p>}
         {trade && (
           <TradeCard trade={trade}>
@@ -100,7 +108,6 @@ function AdvanceRequest({ trade, farmer, onDone }: { trade: Trade; farmer: strin
   const [room, setRoom] = useState<{ limit: bigint | null; exposure: bigint } | null>(null);
   const [value, setValue] = useState("");
   const [link, setLink] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const pool = network.contracts.pool;
@@ -151,7 +158,6 @@ function AdvanceRequest({ trade, farmer, onDone }: { trade: Trade; farmer: strin
     });
     if (out && typeof out.result === "string") {
       setLink(`${window.location.origin}/buyer?trade=${trade.id}#advance=${out.result}`);
-      setCopied(false);
     }
   }
 
@@ -163,15 +169,13 @@ function AdvanceRequest({ trade, farmer, onDone }: { trade: Trade; farmer: strin
           Step 2: send this link to the buyer. They review it and complete it with their signature; the advance is paid
           to you at that moment. The link is valid for one hour.
         </p>
-        <div className="flex gap-2">
-          <input className="input font-mono text-xs" readOnly value={link} onFocus={(e) => e.target.select()} aria-label="Advance request link" />
-          <button
-            className="btn-brand shrink-0"
-            onClick={() => navigator.clipboard.writeText(link).then(() => setCopied(true))}
-          >
-            {copied ? "Copied" : "Copy link"}
-          </button>
-        </div>
+        <ShareLink
+          url={link}
+          subject="Advance request on Avocate"
+          message="Please review and sign my advance request on Avocate (valid for one hour):"
+          qrLabel="QR code with the advance request for the buyer"
+          showQr={false}
+        />
         <button className="text-sm text-brand-dark hover:underline" onClick={onDone}>
           I have sent it — check whether the buyer completed it
         </button>

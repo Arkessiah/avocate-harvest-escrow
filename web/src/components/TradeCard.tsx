@@ -7,6 +7,7 @@ import { pct, short } from "@/lib/format";
 import { formatUsdc } from "@/lib/usdc";
 import { STATE_BADGE, STATE_TEXT, formatDate, owedNow, type Trade } from "@/lib/trade";
 import { TradeTimeline } from "@/components/TradeTimeline";
+import { ShareTrade } from "@/components/ShareTrade";
 
 export function TradeCard({ trade, children }: { trade: Trade; children?: ReactNode }) {
   const { address } = useWallet();
@@ -63,6 +64,10 @@ export function TradeCard({ trade, children }: { trade: Trade; children?: ReactN
       </dl>
 
       {children && <div className="border-t border-ink/5 px-6 py-5">{children}</div>}
+
+      <div className="border-t border-ink/5 px-6 py-4">
+        <ShareTrade id={trade.id} />
+      </div>
     </article>
   );
 }

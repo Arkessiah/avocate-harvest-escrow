@@ -8,6 +8,7 @@ import { network } from "@/lib/network";
 import { read, type Fees } from "@/lib/chain";
 import { pct } from "@/lib/format";
 import { bps, formatUsdc, toUnits } from "@/lib/usdc";
+import { ScanButton } from "@/components/QrScanner";
 
 const DAY = 86_400_000;
 const isoDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
@@ -66,14 +67,17 @@ export function CreateTrade({ onCreated }: { onCreated: (id: string) => void }) 
           <label className="label" htmlFor="seller">
             Farmer's address
           </label>
-          <input
-            id="seller"
-            className="input font-mono"
-            placeholder="G…"
-            value={seller}
-            onChange={(e) => setSeller(e.target.value)}
-            spellCheck={false}
-          />
+          <div className="flex gap-2">
+            <input
+              id="seller"
+              className="input font-mono"
+              placeholder="G…"
+              value={seller}
+              onChange={(e) => setSeller(e.target.value)}
+              spellCheck={false}
+            />
+            <ScanButton onAddress={setSeller} />
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
