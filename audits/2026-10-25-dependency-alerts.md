@@ -5,16 +5,16 @@ submission; the fixes below are scheduled right after it.** Changing the framewo
 live demo would risk more than the alerts do on a testnet beta with no real money and no personal data.
 
 ## What GitHub reports
-Dependabot lists 65 open alerts on `web/`. Each advisory appears twice, once for `web/package.json` and
-once for `web/pnpm-lock.yaml`, so there are about 32 distinct advisories in six packages. The smart
+Dependabot lists 65 open alerts on `web/`, covering 36 distinct advisories in seven packages. Advisories on
+direct dependencies appear twice, once for `web/package.json` and once for `web/pnpm-lock.yaml`. The smart
 contracts (`contract/`) have no alerts.
 
 | Package | How it gets in | Alerts | Severity | Fixed in |
 |---|---|---|---|---|
-| `next` 14.2.35 | Direct dependency | 46 | 6 critical, 18 high, 18 medium, 4 low | 15.5.x / 16 only |
-| `postcss` | Direct dev dependency (8.5.6) and bundled inside Next (8.4.31) | 8 | high, medium | 8.5.23+ |
+| `next` 14.2.35 | Direct dependency | 50 (25 advisories) | 6 critical, 18 high, 22 medium, 4 low | 15.5.x / 16 only |
+| `postcss` | Direct dev dependency (8.5.6) and bundled inside Next (8.4.31) | 8 (4 advisories) | 4 high, 4 medium | 8.5.23+ |
 | `postcss-selector-parser` | Through Tailwind | 1 | medium | 7.1.6 |
-| `zod`, `stream-json`, `uuid`, `elliptic` | Through stellar-wallets-kit and the Stellar SDK | 10 | high (zod), medium, low | Newer versions of those libraries |
+| `zod`, `stream-json`, `uuid`, `elliptic` | Through stellar-wallets-kit and the Stellar SDK | 6 | 1 high (zod), 4 medium, 1 low | Newer versions of those libraries |
 
 ## Exposure of this app
 **Next.js.** 14.2.35 is the last release of the 14 line, which no longer receives fixes, so every Next.js
@@ -39,7 +39,7 @@ connections, so they are updated together with those libraries.
 ## Plan after the hackathon
 1. **Upgrade Next.js to 15.5 (or 16)** in a branch, with React 19: adapt page parameters and request
    APIs, check that stellar-wallets-kit works with React 19, and run the full test suite and every flow on
-   testnet before merging. This closes the 46 Next.js alerts and the bundled PostCSS ones.
+   testnet before merging. This closes the 50 Next.js alerts and the bundled PostCSS ones.
 2. **Raise the direct PostCSS dependency** to the latest 8.5.x, and refresh Tailwind's selector parser.
 3. **Update stellar-wallets-kit and the Stellar SDK** to releases that pull the fixed versions of zod,
    stream-json, uuid and elliptic.
