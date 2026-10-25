@@ -6,7 +6,7 @@ import { read, type Fees } from "@/lib/chain";
 import { AppShell } from "@/components/AppShell";
 import { pct, short } from "@/lib/format";
 
-export default function Home() {
+export function StatusView() {
   const [fees, setFees] = useState<Fees | null>(null);
   const [trades, setTrades] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
