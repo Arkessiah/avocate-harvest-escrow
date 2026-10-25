@@ -95,7 +95,7 @@ that is built.
 | Financing pool: deposits and withdrawals (SEP-56) | Built and tested |
 | Financing pool: advances to farmers, repayment, losses | Built and tested |
 | Pool and financing on testnet | Deployed; two financed trades run end to end ([report](deploy/deployments/testnet-smoke.md)) |
-| Web app | In progress, live at https://avocate-harvest-escrow.vercel.app: buyer and farmer screens, co-signed advances |
+| Web app | Live at https://avocate-harvest-escrow.vercel.app: screens for buyer, farmer (co-signed advances), pool depositor, validator, agent and Avocate admin. Landing page and languages in progress |
 
 Contracts and build instructions: [`contract/`](contract/README.md).
 
