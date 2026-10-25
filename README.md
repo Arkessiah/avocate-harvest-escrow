@@ -2,7 +2,7 @@
 
 [![contracts](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml)
 
-**Version 0.0.2** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
+**Version 0.0.3** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
 
 **Live app:** https://avocate-harvest-escrow.vercel.app
 
@@ -104,6 +104,7 @@ that is built.
 | Financing pool: advances to farmers, repayment, losses | Built and tested |
 | Pool and financing on testnet | Deployed; two financed trades run end to end ([report](deploy/deployments/testnet-smoke.md)) |
 | Web app | Live at https://avocate-harvest-escrow.vercel.app: screens for buyer, farmer (co-signed advances), pool depositor, validator, agent and Avocate admin, plus a landing page with SEO and AI-crawler metadata. Languages in progress |
+| Agent with x402 payments | Live: buys the validator's delivery check over x402 before each release |
 
 Contracts and build instructions: [`contract/`](contract/README.md).
 
@@ -136,6 +137,7 @@ Current testnet deployment: [addresses](deploy/deployments/testnet.json) ·
 
 ## Version history
 
+- **0.0.3**: autonomous agent that pays for the validator's delivery check over x402 (0.01 USDC per check, settled on Stellar) and releases a trade only when the check matches the chain.
 - **0.0.2**: trades agreed on the spot, signed by buyer and farmer from a link or a QR code (`create_trade`, platform upgraded in place); either party can cancel a trade before it is funded (new escrow code for new trades).
 - **0.0.1**: escrow, platform and financing pool on testnet; web app with buyer, farmer, pool, validator, agent and admin screens.
 
