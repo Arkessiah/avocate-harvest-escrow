@@ -2,7 +2,7 @@
 
 [![contracts](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml/badge.svg)](https://github.com/Arkessiah/avocate-harvest-escrow/actions/workflows/contracts.yml)
 
-**Version 0.0.1** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
+**Version 0.1.0** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
 
 **Live app:** https://avocate-harvest-escrow.vercel.app
 
@@ -125,6 +125,11 @@ validator accounts) and, for the demo validator, `DEMO_VALIDATOR=true`. `pnpm te
 
 Current testnet deployment: [addresses](deploy/deployments/testnet.json) ·
 [end-to-end run](deploy/deployments/testnet-smoke.md).
+
+## Version history
+
+- **0.1.0**: trades agreed on the spot, signed by buyer and farmer from a link or a QR code (`create_trade`, platform upgraded in place); either party can cancel a trade before it is funded (new escrow code for new trades).
+- **0.0.1**: escrow, platform and financing pool on testnet; web app with buyer, farmer, pool, validator, agent and admin screens.
 
 ## Prior work
 
