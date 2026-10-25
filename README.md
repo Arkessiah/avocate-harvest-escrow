@@ -82,6 +82,9 @@ that is built.
 - The agent route is safe to expose: the contract only lets it trigger the agreed payout after a conforming validation.
 - The validator route is a **demo convenience**, disabled unless `DEMO_VALIDATOR=true`. A real validator is an independent inspector signing with their own wallet; a public route signing as the validator would let anyone decide deliveries.
 - The inspection report stays off-chain; only its SHA-256 hash is recorded, so anyone holding the report can verify it.
+- **Paid delivery checks (x402).** The validator sells a delivery check at `/api/x402/delivery-check`: 0.01 USDC per query over x402, paid to the validator's account and settled on Stellar by the facilitator. It refuses contracts that are not Avocate trades before asking for any payment, and only settles once the answer has been read from the chain.
+- **The agent pays before it releases.** On each run it buys the check for every trade ready to settle, compares the verdict and the report fingerprint with what the chain records, and only then calls `agent_release`. A mismatch releases nothing.
+- **The agent's spending is capped.** It buys checks only from a fixed, configured address (never one taken from the incoming request), and its payment policy accepts only our validator as payee, USDC on this network, and at most 0.01 USDC per check.
 
 **Web app**
 - Every signature happens in the user's own wallet; the app never sees a secret key. Before asking for one, it checks that the wallet is on the same network as the app.
@@ -122,6 +125,11 @@ is a new config file, not a code change. Accounts are local identities of the St
 Web app (`web/`): `pnpm install && pnpm dev`. Service routes need, in `web/.env.local` or in the
 hosting provider: `AGENT_SECRET`, `VALIDATOR_SECRET` (secret keys of the deployed agent and
 validator accounts) and, for the demo validator, `DEMO_VALIDATOR=true`. `pnpm test` runs the web unit tests.
+
+The agent pays for delivery checks with x402 (`scripts/setup-x402.sh <network>` gives the agent
+and validator accounts a USDC trustline and the agent a small USDC balance). Optional variables:
+`AGENT_CHECK_BASE_URL` (where the agent buys checks; defaults to the live site, set it to
+`http://localhost:3030` locally) and `X402_FACILITATOR_URL` (defaults to `https://x402.org/facilitator`).
 
 Current testnet deployment: [addresses](deploy/deployments/testnet.json) ·
 [end-to-end run](deploy/deployments/testnet-smoke.md).
