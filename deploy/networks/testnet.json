@@ -1,0 +1,18 @@
+{
+  "name": "testnet",
+  "rpc_url": "https://soroban-testnet.stellar.org",
+  "horizon_url": "https://horizon-testnet.stellar.org",
+  "network_passphrase": "Test SDF Network ; September 2015",
+  "explorer_tx": "https://stellar.expert/explorer/testnet/tx/",
+  "friendbot_url": "https://friendbot.stellar.org",
+  "usdc": {
+    "contract": "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+    "asset": "USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+  },
+  "fees": {
+    "trade_fee_bps": 10,
+    "financing_fee_bps": 20,
+    "pool_yield_bps": 200
+  },
+  "max_advance_bps": 8000
+}

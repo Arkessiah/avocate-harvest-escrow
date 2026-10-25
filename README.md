@@ -78,10 +78,28 @@ that is built.
 | Platform (fees, escrow factory, registry, upgrade) | Built, tested, deployed on testnet |
 | Financing pool: deposits and withdrawals (SEP-56) | Built and tested |
 | Financing pool: advances to farmers, repayment, losses | Built and tested |
-| Pool and financing on testnet | In progress |
+| Pool and financing on testnet | Deployed; two financed trades run end to end ([report](deploy/deployments/testnet-smoke.md)) |
 | Web app | Planned |
 
-Contracts, build instructions and testnet addresses: [`contract/`](contract/README.md).
+Contracts and build instructions: [`contract/`](contract/README.md).
+
+## Deploy from a clean checkout
+
+Requirements: Rust with the `wasm32v1-none` target, the [Stellar CLI](https://developers.stellar.org/docs/tools/cli), Python 3, Node 20+ and pnpm.
+
+```bash
+scripts/deploy.sh testnet   # build, upload, deploy platform + pool, link them
+scripts/smoke.sh testnet    # two financed trades with real USDC, links in a report
+```
+
+Nothing network-specific is hardcoded: RPC, passphrase, USDC and default fees live in
+[`deploy/networks/<network>.json`](deploy/networks/testnet.json), and each deployment writes its
+addresses to [`deploy/deployments/<network>.json`](deploy/deployments/testnet.json). Another network
+is a new config file, not a code change. Accounts are local identities of the Stellar CLI
+(`avocate-<network>-<role>`); their keys never leave the machine.
+
+Current testnet deployment: [addresses](deploy/deployments/testnet.json) ·
+[end-to-end run](deploy/deployments/testnet-smoke.md).
 
 ## Prior work
 
