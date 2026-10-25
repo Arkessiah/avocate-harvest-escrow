@@ -98,7 +98,7 @@ export function CreateTrade({ onCreated }: { onCreated: (id: string) => void }) 
         </div>
 
         {amount && fee !== null && fees && (
-          <dl className="rounded-xl bg-mist/70 px-4 py-3 text-sm">
+          <dl className="border-t border-ink/10 pt-3 text-sm">
             <div className="flex justify-between">
               <dt className="text-ink/70">Price</dt>
               <dd>{formatUsdc(amount)}</dd>

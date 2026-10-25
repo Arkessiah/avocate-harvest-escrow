@@ -95,7 +95,7 @@ function ValidatorActions({ trade, onDone }: ActionsProps) {
           </button>
         </div>
       ) : (
-        <div className="space-y-3 rounded-xl bg-mist/70 p-4">
+        <div className="space-y-3 border-t border-ink/10 pt-4">
           <p className="text-sm text-ink/70">
             The trade's validator is {short(config.validator)}. Connect that wallet to sign, or, for this demo, let
             Avocate's demo validator record the verdict.

@@ -22,10 +22,10 @@ export function FarmerView() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-5">
-      <div className="lg:col-span-2">
+      <div className="order-2 lg:order-none lg:col-span-2">
         <ProposeDeal side="farmer" />
       </div>
-      <div className="lg:col-span-3">
+      <div className="order-1 lg:order-none lg:col-span-3">
         <TradePicker current={tradeId} onSelect={setTradeId} party="seller" version={version} />
         {error && <p className="card p-6 text-sm text-danger">{error}</p>}
         {loading && !trade && <p className="card p-6 text-sm text-ink/70">Reading the trade from the network…</p>}
@@ -186,11 +186,11 @@ function AdvanceRequest({ trade, farmer, onDone }: { trade: Trade; farmer: strin
         </p>
       </div>
       <dl className="grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-xl bg-mist/70 px-3 py-2">
+        <div className="border-t border-ink/10 pt-2">
           <dt className="label">Your limit left</dt>
           <dd className="font-semibold">{formatUsdc(available)}</dd>
         </div>
-        <div className="rounded-xl bg-mist/70 px-3 py-2">
+        <div className="border-t border-ink/10 pt-2">
           <dt className="label">Max on this trade ({pct(network.maxAdvanceBps)})</dt>
           <dd className="font-semibold">{formatUsdc(cap)}</dd>
         </div>
@@ -207,7 +207,7 @@ function AdvanceRequest({ trade, farmer, onDone }: { trade: Trade; farmer: strin
         </div>
       </div>
       {principal && repay !== null && fee !== null && !problem && (
-        <dl className="rounded-xl bg-mist/70 px-4 py-3 text-sm">
+        <dl className="border-t border-ink/10 pt-3 text-sm">
           <div className="flex justify-between">
             <dt className="text-ink/70">You receive now</dt>
             <dd className="font-semibold">{formatUsdc(principal)}</dd>

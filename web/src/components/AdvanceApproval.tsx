@@ -103,11 +103,11 @@ export function AdvanceApproval({
   return frame(
     <div className="mt-3 space-y-4">
       <dl className="grid gap-3 text-sm sm:grid-cols-2">
-        <div className="rounded-xl bg-mist px-3 py-2">
+        <div className="border-t border-ink/10 pt-2">
           <dt className="label">Farmer receives now</dt>
           <dd className="text-lg font-semibold">{formatUsdc(request.principal)}</dd>
         </div>
-        <div className="rounded-xl bg-mist px-3 py-2">
+        <div className="border-t border-ink/10 pt-2">
           <dt className="label">Owed to the pool ({pct(config.pool_yield_bps)} yield)</dt>
           <dd className="text-lg font-semibold">{formatUsdc(repay)}</dd>
         </div>

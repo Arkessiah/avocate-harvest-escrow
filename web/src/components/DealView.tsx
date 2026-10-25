@@ -110,29 +110,29 @@ export function DealView() {
         {short(deal.proposer)} has signed these terms and asks you, as the {me}, to sign them too.
       </p>
       <dl className="grid grid-cols-2 gap-3 text-sm">
-        <div className="col-span-2 rounded-xl bg-mist/70 px-3 py-2">
+        <div className="col-span-2 border-t border-ink/10 pt-2">
           <dt className="label">Price</dt>
           <dd className="text-2xl font-semibold">{formatUsdc(deal.amount)}</dd>
         </div>
-        <div className="rounded-xl bg-mist/70 px-3 py-2">
+        <div className="border-t border-ink/10 pt-2">
           <dt className="label">Buyer</dt>
           <dd className="font-mono">
             {short(deal.buyer, 4)}
             {me === "buyer" && " (you)"}
           </dd>
         </div>
-        <div className="rounded-xl bg-mist/70 px-3 py-2">
+        <div className="border-t border-ink/10 pt-2">
           <dt className="label">Farmer</dt>
           <dd className="font-mono">
             {short(deal.seller, 4)}
             {me === "farmer" && " (you)"}
           </dd>
         </div>
-        <div className="rounded-xl bg-mist/70 px-3 py-2">
+        <div className="border-t border-ink/10 pt-2">
           <dt className="label">Deadline</dt>
           <dd>{formatDate(deal.deadline)}</dd>
         </div>
-        <div className="rounded-xl bg-mist/70 px-3 py-2">
+        <div className="border-t border-ink/10 pt-2">
           <dt className="label">Trade fee</dt>
           <dd>{fees && fee !== null ? `${formatUsdc(fee)} (${pct(fees.trade_fee_bps)}, paid by the buyer)` : "…"}</dd>
         </div>

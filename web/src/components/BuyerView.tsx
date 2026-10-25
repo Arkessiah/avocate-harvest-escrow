@@ -39,7 +39,7 @@ export function BuyerView() {
         />
       )}
       <div className="grid gap-6 lg:grid-cols-5">
-        <div className="space-y-6 lg:col-span-2">
+        <div className="order-2 space-y-6 lg:order-none lg:col-span-2">
           <CreateTrade
             onCreated={(id) => {
               setTradeId(id);
@@ -48,7 +48,7 @@ export function BuyerView() {
           />
           <ProposeDeal side="buyer" />
         </div>
-        <div className="lg:col-span-3">
+        <div className="order-1 lg:order-none lg:col-span-3">
           <TradePicker current={tradeId} onSelect={setTradeId} party="buyer" version={version} />
           {error && <p className="card p-6 text-sm text-danger">{error}</p>}
           {loading && !trade && <p className="card p-6 text-sm text-ink/70">Reading the trade from the network…</p>}
