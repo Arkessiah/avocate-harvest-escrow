@@ -111,6 +111,8 @@ Full report: **[security audit (PDF)](audits/2026-10-25-security-audit.pdf)** ·
 
 The fixes made after the audit (no refund after a conforming delivery, the loss booked at the rejection, yield charged in proportion to time, deposits paused while an advance is overdue, deadline refunds open to anyone, and an upgradeable pool v2) are in the rules above, each tagged with its finding. This was an internal review by the project team, not an independent audit; one is planned before any mainnet deployment.
 
+**Dependencies.** GitHub's Dependabot alerts on the web app (mostly Next.js 14, whose line no longer gets fixes) were reviewed during the hackathon: what applies to this app, what does not, and the upgrade plan scheduled right after it. See **[dependency alerts: review and plan](audits/2026-10-25-dependency-alerts.md)**.
+
 ## Status
 
 | Piece | State |
