@@ -1,0 +1,23 @@
+# Rust / Soroban
+target/
+.soroban/
+.stellar/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.vercel/
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+.env*.local
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+._*
