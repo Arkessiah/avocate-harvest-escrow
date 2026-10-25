@@ -24,7 +24,8 @@ get an advance from a financing pool funded by buyers and other depositors.
 | **Avocate (platform)** | Sets the fee schedule, deploys every trade escrow and keeps the registry of trades. |
 
 Flow: `create → fund → (validate) → confirm by the buyer or release by the agent`, or
-`refund` when the deadline passes or the validator rejects the delivery. A trade can be
+`refund` when the deadline passes or the validator rejects the delivery. The buyer can fund
+in USDC or pay the difference in XLM through Soroswap. A trade can be
 opened by the buyer alone, or agreed on the spot by both parties: one proposes and signs,
 the other completes it from a link or by scanning a QR code.
 
@@ -92,6 +93,7 @@ that is built.
 - Advance requests travel from the farmer to the buyer as a link. The request sits in the URL fragment, which browsers never send to any server.
 - The buyer's screen does not trust the link: it decodes the transaction they are about to sign and checks that it is a single call to the Avocate pool's `advance`, prepared for their account. The amounts shown come from that transaction.
 - The farmer's signature on a request expires after one hour.
+- **Paying in XLM (Soroswap).** A buyer short of USDC can pay the difference in XLM: Soroswap's router swaps exactly the USDC missing (`swap_tokens_for_exact_tokens`), with the XLM capped at the quote plus 1%, so a price move beyond that makes the swap fail instead of overcharging. The escrow itself only ever receives USDC. The router address lives in `deploy/networks/<network>.json` (on testnet it changes when the network is reset).
 - Trade proposals work the same way: the link or QR code carries the compressed transaction, the receiving screen checks it is a single `create_trade` call on the Avocate platform prepared for the connected account, shows the terms read from it, and the proposer's signature expires after one hour. A damaged or oversized payload is refused before it is decoded.
 
 ## Status
@@ -105,6 +107,7 @@ that is built.
 | Pool and financing on testnet | Deployed; two financed trades run end to end ([report](deploy/deployments/testnet-smoke.md)) |
 | Web app | Live at https://avocate-harvest-escrow.vercel.app: screens for buyer, farmer (co-signed advances), pool depositor, validator, agent and Avocate admin, plus a landing page with SEO and AI-crawler metadata. Languages in progress |
 | Agent with x402 payments | Live: buys the validator's delivery check over x402 before each release |
+| Pay in XLM (Soroswap) | Live on testnet: the buyer can fund a trade with XLM, swapped to USDC by Soroswap's router |
 
 Contracts and build instructions: [`contract/`](contract/README.md).
 

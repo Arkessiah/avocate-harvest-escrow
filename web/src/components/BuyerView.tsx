@@ -5,6 +5,7 @@ import { useWallet } from "@/components/WalletProvider";
 import { useTx } from "@/components/TxProvider";
 import { CreateTrade } from "@/components/CreateTrade";
 import { CancelTrade } from "@/components/CancelTrade";
+import { PayWithXlm } from "@/components/PayWithXlm";
 import { ProposeDeal } from "@/components/ProposeDeal";
 import { TradeCard } from "@/components/TradeCard";
 import { TradePicker } from "@/components/TradePicker";
@@ -106,6 +107,7 @@ function BuyerActions({ trade, onDone }: { trade: Trade; onDone: () => void }) {
         >
           Deposit {formatUsdc(total)}
         </button>
+        <PayWithXlm trade={trade} buyer={address} total={total} usdc={balance} onDone={onDone} />
         <CancelTrade trade={trade} me={address} onDone={onDone} />
       </div>
     );
