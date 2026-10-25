@@ -100,10 +100,16 @@ for state badges only.
 
 ## Landing page
 
-English only. Animated isometric figure explaining the trade flow (built with the
-`anatomy`-based industrial design figures), Avocate and HackMeridian 2026 Lisbon logos,
-"Built on" Stellar (Soroban) and Circle (USDC), "security patterns by OpenZeppelin", and a
-visible beta notice: testnet only, no real money.
+English only, at `/`; the app starts at `/overview`. Left-aligned hero with live numbers
+read from the contracts, then problem and answer, the five steps of a trade, the anti-fraud
+rules and a FAQ (also published as FAQPage structured data). The Avocate wordmark appears
+here and nowhere else. A dark strip at the very top states the beta: testnet only, no real
+money.
+
+"Built on" shows the Stellar, USDC and OpenZeppelin logos exactly as published by their
+owners (never recoloured), each with a one-line caption, plus the HackMeridian 2026 Lisbon
+logo. The footer carries the trademark and non-affiliation notices their brand policies ask
+for. An animated isometric figure of the trade flow is planned for a later pass.
 
 ## Language
 
