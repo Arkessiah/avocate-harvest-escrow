@@ -4,6 +4,8 @@
 
 **Version 0.0.1** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
 
+**Live app:** https://avocate-harvest-escrow.vercel.app
+
 Stablecoin escrow for agricultural trade between farmers and buyers, on Stellar (Soroban).
 Today a farmer ships the harvest and waits weeks to be paid. Here the buyer locks the price in
 USDC when ordering, and the farmer is paid **in seconds** once the delivery is confirmed. If
@@ -79,7 +81,7 @@ that is built.
 | Financing pool: deposits and withdrawals (SEP-56) | Built and tested |
 | Financing pool: advances to farmers, repayment, losses | Built and tested |
 | Pool and financing on testnet | Deployed; two financed trades run end to end ([report](deploy/deployments/testnet-smoke.md)) |
-| Web app | Planned |
+| Web app | In progress: live at https://avocate-harvest-escrow.vercel.app, reading the testnet deployment |
 
 Contracts and build instructions: [`contract/`](contract/README.md).
 
