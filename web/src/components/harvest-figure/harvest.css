@@ -1,0 +1,113 @@
+/* The kit's light theme, retuned to the project's palette (DESIGN.md). Scoped to .hf. */
+.iso.hf[data-theme="light"] {
+  --anatomy-card: #f8fcfa;
+  --anatomy-text: #3b5249;
+  --anatomy-strong: #0b1f17;
+  --anatomy-muted: #4e6a5e;
+  --anatomy-paper: #f8fcfa;
+  --anatomy-face: #ffffff;
+  --anatomy-top: #ffffff;
+  --anatomy-shade-0: #d2e3db;
+  --anatomy-shade-1: #dde9e3;
+  --anatomy-shade-2: #e8f1ec;
+  --anatomy-shade-3: #f1f7f4;
+  --anatomy-lit-top: #ffffff;
+  --anatomy-lit-shade: #e6f4ed;
+  --anatomy-hi: #0b1f17;
+  --anatomy-mid: #5d786c;
+  --anatomy-lo: #a3b9af;
+  --anatomy-faint: #cde0d7;
+  --anatomy-lit: #007a4d;
+  --anatomy-halo: #3e5a4e;
+  --anatomy-halo-opacity: 0.22;
+  --anatomy-dot: #0b1f17;
+  --anatomy-green: #009e63;
+}
+
+.hf .iso-figure {
+  margin: 0;
+}
+.hf .iso-plate {
+  border-radius: 1.5rem;
+  box-shadow: 0 0 0 1px rgb(11 31 23 / 0.08);
+  padding: 44px 16px 48px;
+}
+.hf .iso-plate-corners {
+  inset: 16px 20px;
+}
+.hf .iso-legend {
+  padding: 0 4px;
+}
+
+/* USDC coins: a pale mint face so they read as money against the grey machine. */
+.hf-coin .iso-top {
+  fill: #dff5ea;
+}
+.hf-coin-mark {
+  fill: var(--anatomy-lit);
+  font-family: var(--anatomy-mono);
+  font-weight: 700;
+}
+
+/* The validator's seal is the one lit accent: brand green once it is pressed. */
+.hf-seal .iso-top {
+  fill: #009e63;
+}
+.hf-seal .iso-shade {
+  fill: #00653f;
+}
+.hf-seal .iso-edge {
+  stroke: #00653f;
+}
+.hf-seal-mark {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hf-avocado .iso-top {
+  fill: #2f6b3b;
+}
+.hf-avocado .iso-shade {
+  fill: #1f4a28;
+}
+.hf-avocado .iso-edge {
+  stroke: #173a1f;
+}
+.hf-avocado-top .iso-top {
+  fill: #4a8a4f;
+}
+.hf-stem {
+  fill: #8a6a3b;
+}
+
+.hf-level {
+  fill: #4fd1a5;
+  opacity: 0.75;
+}
+.hf-glass .iso-top,
+.hf-glass .iso-shade {
+  fill: #f4fbf8;
+}
+
+.hf-counter {
+  fill: #007a4d;
+  font-family: var(--anatomy-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.hf-window .iso-top,
+.hf-window .iso-shade {
+  fill: #e4f2eb;
+}
+
+.hf-stage {
+  cursor: pointer;
+  outline: none;
+}
+.hf-stage:focus-visible {
+  box-shadow: 0 0 0 2px #007a4d;
+  border-radius: 1rem;
+}
