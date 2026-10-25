@@ -33,7 +33,7 @@ export default function Home() {
       <h1 className="text-2xl font-bold tracking-tight">
         Avocate <span className="text-brand">Harvest Escrow</span>
       </h1>
-      <p className="mt-1 max-w-xl text-sm text-ink/60">
+      <p className="mt-1 max-w-xl text-sm text-ink/70">
         Farmers get paid in seconds once delivery is confirmed.
       </p>
 
@@ -46,7 +46,7 @@ export default function Home() {
         <ul className="mt-4 space-y-2 text-sm">
           {contracts.map(([label, id]) => (
             <li key={id} className="flex items-center justify-between gap-4">
-              <span className="text-ink/60">{label}</span>
+              <span className="text-ink/70">{label}</span>
               <a
                 className="font-mono text-brand-dark hover:underline"
                 href={`${network.explorerContract}${id}`}

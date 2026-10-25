@@ -12,13 +12,14 @@ typography, and every on-chain step shown to the user as it happens.
 | Token | Hex | Use |
 |---|---|---|
 | `brand` | `#009E63` | Primary accent: active navigation, icons, large text, progress |
-| `brand-dark` | `#007A4D` | Text and links in the brand colour; hover state of primary buttons |
+| `brand-dark` | `#007A4D` | Primary button fill; text and links in the brand colour |
+| `brand-deep` | `#00653F` | Hover state of primary buttons |
 | `brand-light` | `#4FD1A5` | Background glow only |
 | `ink` | `#0B1F17` | Body text |
 | `mist` | `#E8F5EF` | Page background |
 
-Text opacity steps on `ink`: 100% body, 70% secondary, 60% muted. Use alpha on `ink`
-(`text-ink/60`) rather than new greys.
+Text opacity steps on `ink`: 100% body, 70% secondary and muted. 70% is the floor: lighter
+text fails contrast on `mist`. Use alpha on `ink` rather than new greys.
 
 Trade states:
 
@@ -38,13 +39,14 @@ Errors: `border-rose-200 bg-rose-50/70 text-rose-700`.
 | `ink` on `mist` | 15.33:1 | pass |
 | `brand-dark` on `mist` | 4.82:1 | pass |
 | white on `brand-dark` | 5.40:1 | pass |
-| `ink/60` on white | 4.53:1 | pass |
+| white on `brand-deep` | 7.16:1 | pass |
+| `ink/70` on `mist` | 6.06:1 | pass |
+| `ink/60` on `mist` | 4.36:1 | **fails** |
 | white on `brand` | 3.46:1 | **fails** (large text only) |
 | `ink/40` on white | 2.52:1 | **fails** |
 
-Proposed, pending approval: primary buttons filled with `brand-dark` (hover darker) instead
-of `brand`, and `ink/60` as the lightest text colour. `brand` stays for accents, icons and
-large text.
+Hence primary buttons are filled with `brand-dark` (not `brand`), and `ink/70` is the lightest
+text. `brand` is kept for accents, icons, the active navigation pill and large text.
 
 ## Background
 
@@ -61,7 +63,7 @@ body. Hierarchy comes from weight and colour, not italics.
 |---|---|
 | App title | `text-2xl font-bold tracking-tight`, product name in `text-brand` |
 | Section title | `text-lg font-semibold` |
-| Label / eyebrow | `.label`: `text-xs font-medium uppercase tracking-wide text-ink/50` |
+| Label / eyebrow | `.label`: `text-xs font-medium uppercase tracking-wide text-ink/70` |
 | Addresses and hashes | `font-mono`, shortened `ABCDEF…UVWXYZ`, linked to the explorer |
 
 ## Components
@@ -69,7 +71,7 @@ body. Hierarchy comes from weight and colour, not italics.
 | Class | Definition |
 |---|---|
 | `.card-glass` | `rounded-2xl border border-white/60 bg-white/70 shadow-sm backdrop-blur-md` |
-| `.btn-brand` | primary action, `rounded-xl px-4 py-2.5 font-medium text-white`, disabled at 50% opacity |
+| `.btn-brand` | primary action, `bg-brand-dark hover:bg-brand-deep rounded-xl px-4 py-2.5 font-medium text-white`, disabled at 50% opacity |
 | `.btn-ghost` | secondary action, `rounded-xl border border-brand/30 bg-white/60 text-brand-dark` |
 | `.input` | `rounded-xl border border-ink/10 bg-white/80 px-3 py-2 text-sm`, focus ring `brand/20` |
 | Stat tile | `rounded-xl bg-white/60 px-4 py-3`, label on top, value `text-lg font-semibold` |

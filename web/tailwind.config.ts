@@ -6,7 +6,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: { DEFAULT: "#009E63", dark: "#007A4D", light: "#4FD1A5" },
+        brand: { DEFAULT: "#009E63", dark: "#007A4D", deep: "#00653F", light: "#4FD1A5" },
         ink: "#0B1F17",
         mist: "#E8F5EF",
       },
