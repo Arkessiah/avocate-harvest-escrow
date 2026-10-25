@@ -53,8 +53,9 @@ export function PoolView() {
         <div className="flex items-center gap-4">
           <div className="relative h-32 w-32 shrink-0">
             <Ring part={lent !== null ? Number(lent) : 0} total={Number(base)} label={`${lentPct}% of the pool is lent to farmers`} />
-            <span className="absolute inset-0 flex items-center justify-center font-condensed text-2xl" aria-hidden>
-              {lentPct}%
+            <span className="absolute inset-0 flex flex-col items-center justify-center leading-none" aria-hidden>
+              <span className="font-condensed text-3xl">{lentPct}%</span>
+              <span className="mt-1 text-xs text-ink/70">lent out</span>
             </span>
           </div>
           <dl className="space-y-2 text-sm">
@@ -70,6 +71,13 @@ export function PoolView() {
               </dt>
               <dd className="font-semibold">{pool ? formatUsdc(pool.held) : "…"}</dd>
             </div>
+            <p className="max-w-[12rem] text-xs text-ink/70">
+              {lentPct === 0
+                ? "Nothing is lent right now: all of it is ready to advance to farmers."
+                : pool?.loans.length === 1
+                  ? "1 advance earning yield until its trade settles."
+                  : `${pool?.loans.length} advances earning yield until their trades settle.`}
+            </p>
           </dl>
         </div>
       </section>
