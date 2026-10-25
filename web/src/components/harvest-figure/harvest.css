@@ -67,17 +67,23 @@
   stroke-linejoin: round;
 }
 
-.hf-avocado .iso-top {
-  fill: #2f6b3b;
-}
+/* Hass avocados: deep green skin, a lighter shoulder where the light catches them. */
+.hf-avocado .iso-fill,
 .hf-avocado .iso-shade {
-  fill: #1f4a28;
+  fill: #3f6e33;
+}
+.hf-avocado .iso-top {
+  fill: #5a8a40;
 }
 .hf-avocado .iso-edge {
-  stroke: #173a1f;
+  stroke: #24461d;
+}
+.hf-avocado-top .iso-fill,
+.hf-avocado-top .iso-shade {
+  fill: #5a8a40;
 }
 .hf-avocado-top .iso-top {
-  fill: #4a8a4f;
+  fill: #7fa85a;
 }
 .hf-stem {
   fill: #8a6a3b;
@@ -110,4 +116,103 @@
 .hf-stage:focus-visible {
   box-shadow: 0 0 0 2px #007a4d;
   border-radius: 1rem;
+}
+
+/* Materials of the goods row. Each keeps the kit's four shade steps, darkest facing away. */
+.hf-leaf .iso-fill,
+.hf-leaf .iso-shade[data-shade="0"] {
+  fill: #3e7a3e;
+}
+.hf-leaf .iso-shade[data-shade="1"] {
+  fill: #4a8a47;
+}
+.hf-leaf .iso-shade[data-shade="2"] {
+  fill: #589751;
+}
+.hf-leaf .iso-shade[data-shade="3"] {
+  fill: #66a35c;
+}
+.hf-leaf .iso-top {
+  fill: #7db46f;
+}
+.hf-leaf .iso-edge,
+.hf-leaf .iso-crease {
+  stroke: #2b5a2c;
+}
+
+.hf-soil .iso-fill,
+.hf-soil .iso-shade,
+.hf-soil .iso-top {
+  fill: #a9825a;
+}
+.hf-soil .iso-top {
+  fill: #b98f63;
+}
+.hf-soil .iso-edge {
+  stroke: #6e4f31;
+}
+.hf-furrow {
+  stroke: #7a5836;
+}
+
+.hf-wood .iso-fill,
+.hf-wood .iso-shade[data-shade="0"] {
+  fill: #d9bd8c;
+}
+.hf-wood .iso-shade[data-shade="1"] {
+  fill: #e1c697;
+}
+.hf-wood .iso-shade[data-shade="2"] {
+  fill: #e8cfa3;
+}
+.hf-wood .iso-shade[data-shade="3"] {
+  fill: #eed7ae;
+}
+.hf-wood .iso-top {
+  fill: #f3e0bc;
+}
+.hf-wood .iso-edge,
+.hf-wood .iso-crease {
+  stroke: #8a6a3b;
+}
+
+.hf-bark .iso-fill,
+.hf-bark .iso-shade,
+.hf-bark .iso-top {
+  fill: #8a6744;
+}
+.hf-bark .iso-top {
+  fill: #9c7a55;
+}
+.hf-bark .iso-edge,
+.hf-bark .iso-crease {
+  stroke: #4e3720;
+}
+.hf-stem-solid .iso-fill,
+.hf-stem-solid .iso-shade,
+.hf-stem-solid .iso-top {
+  fill: #7a8a4a;
+}
+.hf-stalk {
+  stroke: #5a4626;
+}
+
+/* The belt is rubber: dark, with lighter ribs. */
+.hf-belt .iso-fill,
+.hf-belt .iso-shade,
+.hf-belt .iso-top {
+  fill: #50625a;
+}
+.hf-belt .iso-top {
+  fill: #5d7067;
+}
+.hf-belt .iso-edge {
+  stroke: #2f3d37;
+}
+.hf .hf-rib {
+  stroke: #8ea69b;
+}
+.hf .hf-needle {
+  stroke: #b3261e;
+  stroke-width: 0.9;
 }
