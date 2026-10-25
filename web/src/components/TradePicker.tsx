@@ -11,17 +11,25 @@ import { describeError } from "@/lib/errors";
 
 type Party = "buyer" | "seller";
 
-// Lists the platform's trades so nobody has to copy an address to follow one. With a
-// wallet connected it can narrow to the trades where that wallet is `party`.
+export interface Focus {
+  label: string;
+  test: (t: Trade) => boolean;
+}
+
+// Lists the platform's trades so nobody has to copy an address to follow one. It can
+// narrow to the trades where the connected wallet is `party`, or to a role's `focus`
+// (for instance, the trades waiting for the validator).
 export function TradePicker({
   current,
   onSelect,
   party,
+  focus,
   version = 0,
 }: {
   current: string | null;
   onSelect: (id: string) => void;
   party?: Party;
+  focus?: Focus;
   version?: number;
 }) {
   const { address } = useWallet();
@@ -42,17 +50,18 @@ export function TradePicker({
 
   const roleOf = (t: Trade) =>
     t.config.buyer === address ? "buyer" : t.config.seller === address ? "farmer" : null;
-  const filtering = !!address && !!party && mine;
-  const shown = trades?.filter((t) => !filtering || t.config[party!] === address) ?? [];
+  const narrow: Focus | null = focus ?? (address && party ? { label: "Mine", test: (t) => t.config[party] === address } : null);
+  const filtering = !!narrow && mine;
+  const shown = trades?.filter((t) => !filtering || narrow!.test(t)) ?? [];
 
   return (
     <section className="card-glass mb-4 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-semibold">Trades on the platform</h2>
-        {address && party && (
+        {narrow && (
           <div className="flex gap-1 rounded-lg bg-white/60 p-1 text-xs font-medium" role="group" aria-label="Filter">
             {[
-              [true, "Mine"],
+              [true, narrow.label],
               [false, "All"],
             ].map(([value, label]) => (
               <button
@@ -72,7 +81,7 @@ export function TradePicker({
       {!trades && !error && <p className="mt-3 text-sm text-ink/70">Reading trades from the network…</p>}
       {trades && shown.length === 0 && (
         <p className="mt-3 text-sm text-ink/70">
-          {filtering ? "No trades for this wallet yet. Switch to All to see every trade." : "No trades yet."}
+          {filtering ? `Nothing under "${narrow!.label}" right now. Switch to All to see every trade.` : "No trades yet."}
         </p>
       )}
 

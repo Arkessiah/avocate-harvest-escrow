@@ -1,12 +1,15 @@
+import { Suspense } from "react";
 import { AppShell } from "@/components/AppShell";
-import { ComingNext } from "@/components/ComingNext";
+import { ValidatorView } from "@/components/ValidatorView";
 
 export const metadata = { title: "Validator · Avocate Harvest Escrow" };
 
 export default function Page() {
   return (
     <AppShell role="validator">
-      <ComingNext />
+      <Suspense>
+        <ValidatorView />
+      </Suspense>
     </AppShell>
   );
 }

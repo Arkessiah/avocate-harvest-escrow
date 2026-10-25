@@ -11,7 +11,7 @@ type Executor = (source: string, onStep: (step: string) => void) => Promise<{ ha
 // Either a plain contract call, or a custom sequence of steps (such as a co-signed advance).
 export type TxRequest = { title: string; detail: string; kind: ContractKind } & (
   | (Invocation & { execute?: undefined })
-  | { execute: Executor }
+  | { execute: Executor; wallet?: false }
 );
 
 type Run = (request: TxRequest) => Promise<{ hash: string; result: unknown } | null>;
@@ -27,8 +27,10 @@ export function TxProvider({ children }: { children: ReactNode }) {
   const run = useCallback<Run>(
     async (request) => {
       const { title, detail, kind } = request;
-      const source = address ?? (await connect());
-      if (!source) return null;
+      // Calls signed by a server-side service account need no wallet from the user.
+      const needsWallet = !("wallet" in request && request.wallet === false);
+      const source = needsWallet ? address ?? (await connect()) : "";
+      if (source === null) return null;
 
       setState({ title, detail, steps: [], status: "running" });
       const onStep = (step: string) => setState((s) => s && { ...s, steps: [...s.steps, step] });

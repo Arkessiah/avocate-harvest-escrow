@@ -1,12 +1,15 @@
+import { Suspense } from "react";
 import { AppShell } from "@/components/AppShell";
-import { ComingNext } from "@/components/ComingNext";
+import { AgentView } from "@/components/AgentView";
 
 export const metadata = { title: "Agent · Avocate Harvest Escrow" };
 
 export default function Page() {
   return (
     <AppShell role="agent">
-      <ComingNext />
+      <Suspense>
+        <AgentView />
+      </Suspense>
     </AppShell>
   );
 }
