@@ -50,6 +50,13 @@ export function PoolView() {
               {pool ? `${change >= 0 ? "+" : ""}${change.toFixed(2)}%` : ""}
             </span>
           </p>
+          {pool && change < 0 && (
+            <p className="mt-2 max-w-md text-xs text-ink/70">
+              Below the start because financed deliveries were rejected in testing: each advance was written off and
+              every depositor shared the loss, as the pool's rules say. Yield on open advances raises it again over
+              time.
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <div className="relative h-32 w-32 shrink-0">
