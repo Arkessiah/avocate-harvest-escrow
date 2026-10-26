@@ -6,7 +6,7 @@
 
 **Version 0.0.5** · Stellar testnet · built for HackMeridian (Genesis · Stellar Composed)
 
-**Live app:** https://avocate-harvest-escrow.vercel.app
+**Live app:** https://avocate-harvest-escrow.vercel.app (hosted on Vercel, deployed from `main`). Try any role from **[/app](https://avocate-harvest-escrow.vercel.app/app)** with a demo wallet: no wallet install needed.
 
 Stablecoin escrow for agricultural trade between farmers and buyers, on Stellar (Soroban).
 Today a farmer ships the harvest and waits weeks to be paid. Here the buyer locks the price in

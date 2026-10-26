@@ -14,6 +14,7 @@ describes that system. It does not include prompts.
 | **Playwright** | Screenshots and end-to-end checks in a real browser |
 | **CoinFabrik Scout** | Static analysis of the Soroban contracts |
 | **GitHub Actions, pnpm** | CI on every push; a package manager with stricter dependency handling |
+| **Vercel** | Hosts the web app and deploys it from `main` on every push; holds the service and demo keys as environment variables |
 
 ## A knowledge vault as long-term memory
 - A personal knowledge vault in Obsidian holds what each project teaches: reusable know-how by topic,

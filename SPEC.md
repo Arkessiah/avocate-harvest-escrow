@@ -22,6 +22,7 @@ Everything happens on Stellar testnet with test USDC, at https://avocate-harvest
 | Screen | For | Main actions |
 |---|---|---|
 | `/` | Everyone | What it is, live numbers, how it works |
+| `/app` | Everyone | Choose a role, with your wallet or a demo wallet |
 | `/buyer` | Buyer | Create, propose, fund (USDC or XLM), confirm, refund, approve an advance |
 | `/farmer` | Farmer | Propose a trade, request an advance, follow payment |
 | `/pool` | Investors | Deposit, withdraw, see loans and yield |
@@ -29,14 +30,24 @@ Everything happens on Stellar testnet with test USDC, at https://avocate-harvest
 | `/agent` | Agent | Release payments after a conforming validation, paying over x402 |
 | `/admin` | Avocate | Fees, farmer onboarding, registry of every trade |
 
+Each role sees only its own screen; Avocate's admin sees all of them, including the agent. Demo wallets
+(prepared test accounts with test USDC) let anyone try a role without installing a wallet, and a demo
+farmer's advance can be completed as the demo buyer of the same trade.
+
 Every action shows its steps while it runs, links to its transaction, and is kept in the browser's
 history panel. Any trade can be shared with another role by link or QR code.
 
+## Deployment
+The contracts run on Stellar testnet (`deploy/deployments/testnet.json`). The web app is hosted on **Vercel**
+and deployed from `main` on every push; service keys (agent, demo validator) and the demo wallets live in
+Vercel's environment variables, never in the repository.
+
 ## Done when
 - [x] Each step of the demo path works on testnet and can be checked in the explorer.
-- [x] Contract rules are covered by tests (77) and the web logic by tests (20), run in CI on every push.
+- [x] Contract rules are covered by tests (77) and the web logic by tests (22), run in CI on every push.
 - [x] A security review (CoinFabrik Scout + manual) is published, with its fixes deployed.
 - [x] `scripts/seed.mjs` fills testnet with trades in every state, so every screen has real data.
+- [x] `scripts/demo-wallets.mjs` prepares demo wallets, so anyone can run the whole flow without a wallet.
 - [x] No secret keys in the repository; service keys are set in the hosting provider and in local env files that git ignores.
 - [ ] Demo video recorded.
 
