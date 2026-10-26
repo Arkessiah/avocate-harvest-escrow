@@ -93,3 +93,8 @@ export const STATE_TEXT: Record<TradeState, string> = {
 
 export const formatDate = (unixSeconds: bigint) =>
   new Date(Number(unixSeconds) * 1000).toLocaleString("en", { dateStyle: "medium", timeStyle: "short" });
+
+// The pool finances a trade only while the buyer's money is locked, before the delivery is
+// checked and before the deadline, and once per trade. The contract enforces each of these.
+export const canAdvance = (t: Trade, nowSeconds = Date.now() / 1000) =>
+  t.state === "Funded" && !t.advance && !t.validation && nowSeconds < Number(t.config.deadline);

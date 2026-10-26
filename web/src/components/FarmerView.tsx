@@ -7,6 +7,7 @@ import { TradeCard } from "@/components/TradeCard";
 import { TradePicker } from "@/components/TradePicker";
 import { ProposeDeal } from "@/components/ProposeDeal";
 import { SwapCard } from "@/components/SwapCard";
+import { AdvanceFinder } from "@/components/AdvanceFinder";
 import { ShareLink } from "@/components/ShareLink";
 import { CancelTrade } from "@/components/CancelTrade";
 import { useTrade, useTradeParam } from "@/components/useTrade";
@@ -18,6 +19,7 @@ import { owedNow, type Trade } from "@/lib/trade";
 import { signAdvanceRequest } from "@/lib/cosign";
 
 export function FarmerView() {
+  const { address } = useWallet();
   const [tradeId, setTradeId] = useTradeParam();
   const { trade, error, loading, refresh } = useTrade(tradeId);
   const [version, setVersion] = useState(0);
@@ -29,6 +31,17 @@ export function FarmerView() {
         <SwapCard />
       </div>
       <div className="order-1 lg:order-none lg:col-span-3">
+        {address && (
+          <AdvanceFinder
+            farmer={address}
+            version={version}
+            onPick={(id) => {
+              setTradeId(id);
+              // The request form sits in the trade card below the list.
+              window.setTimeout(() => document.getElementById("farmer-trade")?.scrollIntoView({ behavior: "smooth" }), 600);
+            }}
+          />
+        )}
         <TradePicker current={tradeId} onSelect={setTradeId} party="seller" version={version} />
         {error && <p className="card p-6 text-sm text-danger">{error}</p>}
         {!tradeId && !error && (
@@ -40,15 +53,17 @@ export function FarmerView() {
         )}
         {loading && !trade && <p className="card p-6 text-sm text-ink/70">Reading the trade from the network…</p>}
         {trade && (
-          <TradeCard trade={trade}>
-            <FarmerActions
-              trade={trade}
-              onDone={() => {
-                refresh();
-                setVersion((v) => v + 1);
-              }}
-            />
-          </TradeCard>
+          <div id="farmer-trade" className="scroll-mt-4">
+            <TradeCard trade={trade}>
+              <FarmerActions
+                trade={trade}
+                onDone={() => {
+                  refresh();
+                  setVersion((v) => v + 1);
+                }}
+              />
+            </TradeCard>
+          </div>
         )}
       </div>
     </div>
