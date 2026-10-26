@@ -2,21 +2,31 @@
 
 import { useWallet } from "@/components/WalletProvider";
 import { short } from "@/lib/format";
+import { setEntryRole } from "@/lib/entry-role";
 
 export function WalletButton() {
-  const { address, connecting, connect, disconnect } = useWallet();
+  const { address, demo, connecting, connect, disconnect } = useWallet();
+
+  // Leaving also forgets the role picked on entry, so the role screen offers every option
+  // again, with any wallet.
+  async function leave() {
+    await disconnect();
+    setEntryRole(null);
+    window.location.assign("/app");
+  }
 
   if (address) {
     return (
-      <button
-        className="card inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-brand-dark hover:bg-mist"
-        onClick={disconnect}
-        title="Disconnect wallet"
-      >
+      <div className="card inline-flex items-center gap-2 py-1.5 pl-3 pr-1.5 text-sm font-medium">
         <span className="h-2 w-2 rounded-full bg-brand" aria-hidden />
-        <span className="font-mono">{short(address, 4)}</span>
-        <span className="sr-only">Disconnect wallet</span>
-      </button>
+        {demo && <span className="chip">Demo</span>}
+        <span className="font-mono text-brand-dark" title={address}>
+          {short(address, 4)}
+        </span>
+        <button className="rounded-lg px-2 py-1 text-xs text-ink/70 hover:bg-mist hover:text-ink" onClick={leave}>
+          Disconnect
+        </button>
+      </div>
     );
   }
 

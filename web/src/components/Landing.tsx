@@ -76,7 +76,7 @@ export function Landing({ lang }: { lang: Lang }) {
             Harvest Escrow
           </span>
         </Link>
-        <Link href="/overview" className="btn-brand shrink-0 whitespace-nowrap px-3 py-2 text-sm sm:px-4 sm:py-2.5 sm:text-base">
+        <Link href="/app" className="btn-brand shrink-0 whitespace-nowrap px-3 py-2 text-sm sm:px-4 sm:py-2.5 sm:text-base">
           {t.openApp}
         </Link>
       </header>
@@ -90,7 +90,7 @@ export function Landing({ lang }: { lang: Lang }) {
             {t.lead}
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/buyer" className="btn-brand">
+            <Link href="/app" className="btn-brand">
               {t.startTrade}
             </Link>
             <a href="#how-it-works" className="btn-ghost">
