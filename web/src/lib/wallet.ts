@@ -2,6 +2,7 @@
 
 import type { Networks } from "@creit.tech/stellar-wallets-kit/types";
 import { network } from "@/lib/network";
+import { demoKeypair, demoSigner, forgetDemoWallet } from "@/lib/demo-wallet";
 
 type Kit = typeof import("@creit.tech/stellar-wallets-kit/sdk").StellarWalletsKit;
 
@@ -21,11 +22,14 @@ function getKit(): Promise<Kit> {
 }
 
 export async function connectWallet(): Promise<string> {
+  const demo = demoKeypair();
+  if (demo) return demo.publicKey();
   const { address } = await (await getKit()).authModal();
   return address;
 }
 
 export async function disconnectWallet(): Promise<void> {
+  if (demoKeypair()) return forgetDemoWallet();
   await (await getKit()).disconnect();
 }
 
@@ -40,10 +44,20 @@ async function readyToSign(): Promise<Kit> {
   return k;
 }
 
+// A demo wallet signs in this browser; any other address goes to the wallet extension.
+const demoFor = (address: string) => {
+  const kp = demoKeypair();
+  return kp && kp.publicKey() === address ? demoSigner(kp) : null;
+};
+
 export async function signTransaction(xdr: string, address: string) {
+  const demo = demoFor(address);
+  if (demo) return demo.signTransaction(xdr);
   return (await readyToSign()).signTransaction(xdr, { address, networkPassphrase: network.passphrase });
 }
 
 export async function signAuthEntry(entry: string, address: string) {
+  const demo = demoFor(address);
+  if (demo) return demo.signAuthEntry(entry);
   return (await readyToSign()).signAuthEntry(entry, { address, networkPassphrase: network.passphrase });
 }

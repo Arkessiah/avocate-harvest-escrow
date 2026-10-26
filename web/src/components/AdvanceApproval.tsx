@@ -8,6 +8,7 @@ import { describeError } from "@/lib/errors";
 import { pct, short } from "@/lib/format";
 import { bps, formatUsdc } from "@/lib/usdc";
 import type { Trade } from "@/lib/trade";
+import { openDemoWallet } from "@/lib/demo-wallet";
 
 const HASH_KEY = "#advance=";
 
@@ -39,8 +40,9 @@ export function AdvanceApproval({
   onDone: () => void;
   onDismiss: () => void;
 }) {
-  const { address, connect } = useWallet();
+  const { address, demo, connect } = useWallet();
   const run = useTx();
+  const [switchError, setSwitchError] = useState<string | null>(null);
   const [request, setRequest] = useState<AdvanceRequest | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,6 +52,26 @@ export function AdvanceApproval({
     if (!address) return;
     readAdvanceRequest(code, address).then(setRequest, (e) => setError(describeError(e, "pool")));
   }, [code, address]);
+
+  // With demo wallets one person can play both sides: the request opens as this trade's demo
+  // buyer. The page reloads with the request still in the address bar.
+  async function switchToDemoBuyer() {
+    if (!trade) return;
+    try {
+      await openDemoWallet({ address: trade.config.buyer });
+      window.location.reload();
+    } catch (e) {
+      setSwitchError(e instanceof Error ? e.message : "This trade's buyer is not a demo wallet.");
+    }
+  }
+  const demoSwitch = demo && trade && address !== trade.config.buyer && (
+    <div className="space-y-2">
+      <button className="btn-brand" onClick={switchToDemoBuyer}>
+        Continue as this trade's demo buyer
+      </button>
+      {switchError && <p className="text-sm text-danger">{switchError}</p>}
+    </div>
+  );
 
   const frame = (body: React.ReactNode) => (
     <section className="mb-6 rounded-2xl border-2 border-brand/40 bg-surface p-5 shadow-sm" aria-labelledby="advance-title">
@@ -75,6 +97,7 @@ export function AdvanceApproval({
     return frame(
       <div className="mt-3 space-y-3">
         <p className="rounded-xl border border-danger-line bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>
+        {demoSwitch}
         <button className="btn-ghost" onClick={onDismiss}>
           Dismiss
         </button>
